@@ -38,12 +38,20 @@
     .field input, .field textarea { width: 100%; padding: 12px 16px; border: 2px solid var(--gray-light); border-radius: 12px; outline: none; }
     .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
     .btn-primary { width: 100%; background: var(--green); color: #fff; border: none; padding: 16px 32px; border-radius: 50px; font-weight: 900; font-size: 1.05rem; cursor: pointer; margin-top: 24px; }
+    .btn-secondary { width: 100%; background: transparent; color: var(--green); border: 2px solid var(--green); padding: 14px 32px; border-radius: 50px; font-weight: 800; font-size: .95rem; cursor: pointer; margin-top: 10px; }
     .estilo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
     .estilo-card { border: 2px solid var(--gray-light); border-radius: 14px; padding: 16px 12px; text-align: center; cursor: pointer; }
     .estilo-card input { display: none; }
     .posicao-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
     .posicao-btn { border: 2px solid var(--gray-light); border-radius: 10px; padding: 10px 14px; cursor: pointer; }
     .posicao-btn input { display: none; }
+    
+    /* UPLOAD AREA */
+    .upload-area { border: 2px dashed var(--cream-dark); border-radius: 14px; padding: 28px 20px; text-align: center; cursor: pointer; background: var(--offwhite); position: relative; }
+    .upload-area input[type="file"] { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+    .preview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 10px; margin-top: 14px; }
+    .preview-item { position: relative; aspect-ratio: 1; border-radius: 10px; overflow: hidden; border: 2px solid var(--gray-light); }
+    .preview-item img { width: 100%; height: 100%; object-fit: cover; }
   </style>
 </head>
 <body>
@@ -60,59 +68,28 @@
 
   <div class="form-layout">
     <div class="steps">
-      <div class="step">
-        <div class="step-circle active">1</div>
-        <span class="step-label active">Personagem</span>
-      </div>
+      <div class="step"><div class="step-circle active">1</div><span class="step-label active">Personagem</span></div>
       <div class="step-line"></div>
-      <div class="step">
-        <div class="step-circle">2</div>
-        <span class="step-label">Referências</span>
-      </div>
+      <div class="step"><div class="step-circle">2</div><span class="step-label">Referências</span></div>
       <div class="step-line"></div>
-      <div class="step">
-        <div class="step-circle">3</div>
-        <span class="step-label">Confirmar</span>
-      </div>
+      <div class="step"><div class="step-circle">3</div><span class="step-label">Confirmar</span></div>
     </div>
 
     <div id="passo-1">
-      <div class="form-card">
-        <div class="form-card-title">Sobre o personagem</div>
-        <div class="form-card-sub">Nos conte quem vai virar boneco! 🎭</div>
-        <div class="field">
-          <label>Nome do personagem *</label>
-          <input type="text" id="nome" placeholder="Ex: Naruto Uzumaki..." />
-        </div>
-        <div class="field">
-          <label>Descrição *</label>
-          <textarea id="descricao" placeholder="Características físicas, roupa..."></textarea>
-        </div>
-        <div class="field">
-          <label>Posição / Pose do boneco *</label>
-          <div class="posicao-grid">
-            <label class="posicao-btn"><input type="radio" name="posicao" value="Em pé" /> 🧍 Em pé</label>
-            <label class="posicao-btn"><input type="radio" name="posicao" value="Sentado" /> 🪑 Sentado</label>
-          </div>
-        </div>
       </div>
 
+    <div id="passo-2" style="display:none;">
       <div class="form-card">
-        <div class="form-card-title">Estilo de modelagem</div>
-        <div class="estilo-grid">
-          <label class="estilo-card"><input type="radio" name="estilo" value="Funko Pop" /> 🎭 Funko Pop</label>
-          <label class="estilo-card"><input type="radio" name="estilo" value="Chibi" /> 🌸 Chibi</label>
+        <div class="form-card-title">Fotos de referência</div>
+        <div class="form-card-sub">Envie fotos de referência para o boneco (opcional)</div>
+        <div class="upload-area" id="upload-area">
+          <input type="file" id="file-input" accept="image/*" multiple />
+          <div>📸 Clique ou arraste fotos aqui</div>
         </div>
+        <div class="preview-grid" id="preview-grid"></div>
       </div>
-
-      <div class="form-card">
-        <div class="form-card-title">Seus dados para contato</div>
-        <div class="field-row">
-          <div class="field"><label>Seu nome *</label><input type="text" id="cliente" /></div>
-          <div class="field"><label>Seu WhatsApp *</label><input type="tel" id="telefone" /></div>
-        </div>
-      </div>
-      <button class="btn-primary">Próximo: Fotos de referência →</button>
+      <button class="btn-primary">Próximo: Revisar pedido →</button>
+      <button class="btn-secondary">← Voltar</button>
     </div>
   </div>
 </body>
