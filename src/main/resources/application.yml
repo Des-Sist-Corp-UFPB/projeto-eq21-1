@@ -1,18 +1,42 @@
+server:
+  port: 8121
+
 spring:
   application:
-    name: mercado
-  profiles:
-    active: dev
+    name: eq21
+  datasource:
+    url: jdbc:postgresql://postgres:5432/eq21
+    username: ${DB_USERNAME:eq21}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 5
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
 
-# Actuator - monitoramento da aplicação
-# Acesse: http://localhost:8080/actuator/health
+aws:
+  s3:
+    endpoint: http://minio:9000
+    public-endpoint: https://s3.dsc.rodrigor.com
+    region: us-east-1
+    bucket: eq21
+    access-key: ${MINIO_ACCESS_KEY:eq21}
+    secret-key: ${MINIO_SECRET}
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration-ms: ${JWT_EXPIRATION_MS:86400000}
+
 management:
   endpoints:
     web:
       exposure:
-        # Expõe apenas os endpoints necessários (não exponha todos em produção!)
         include: health,info,metrics
   endpoint:
     health:
-      # Detalhes do health só são exibidos para usuários autenticados
       show-details: when-authorized
