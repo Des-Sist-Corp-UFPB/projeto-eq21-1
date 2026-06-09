@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Trokets – Bonecos Personalizados de Biscuit</title>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/css/style.css" />
   <style>
     /* ===== TOKENS ===== */
     :root {
@@ -491,7 +492,7 @@
 
   <!-- ===== NAVBAR ===== -->
   <nav>
-    <a class="nav-logo" href="#"><img src="image-removebg-preview__2_.png" alt="Trokets" /></a>
+    <a class="nav-logo" href="#"><img src="\assets\img\logo.png" alt="Trokets" /></a>
     <ul class="nav-links">
       <li><a href="#vitrine">Vitrine</a></li>
       <li><a href="#precos">Preços</a></li>
@@ -633,7 +634,7 @@
         <img src="assets/img/logo.png" alt="Trokets" />
         <p>Bonecos personalizados de biscuit feitos à mão com amor. Cada peça é única, assim como quem a encomenda.</p>
         <div class="footer-social">
-          <a class="social-btn" href="https://instagram.com/trokets" target="_blank" title="Instagram">📸</a>
+          <a class="social-btn" href="https://instagram.com/trokets_biscuit" target="_blank" title="Instagram">📸</a>
           <a class="social-btn" href="https://wa.me/5584996980815" target="_blank" title="WhatsApp">💬</a>
         </div>
       </div>
@@ -708,24 +709,63 @@
           </div>`).join('');
 
       } catch (e) {
-        // Fallback: exibe cards de exemplo quando o back não está disponível
-        const exemplos = [
-          { nome: 'Casal Funko Pop', estilo: 'Funko Pop', descricao: 'Dois personagens personalizados com roupas e acessórios únicos.', preco: 70, emoji: '👫' },
-          { nome: 'Pet Chibi', estilo: 'Chibi', descricao: 'Seu bichinho de estimação em versão fofa e estilizada.', preco: 25, emoji: '🐾' },
-          { nome: 'Herói Funko', estilo: 'Funko Pop', descricao: 'Personagem de quadrinhos ou série favorita em biscuit.', preco: 35, emoji: '🦸' },
-          { nome: 'Personagem Chibi', estilo: 'Chibi', descricao: 'Estilo japonês chibi para qualquer personagem ou pessoa real.', preco: 25, emoji: '🌸' },
-        ];
-        grid.innerHTML = exemplos.map(b => `
-          <div class="card">
-            <div class="card-img" style="font-size:4rem;display:flex;align-items:center;justify-content:center;">${b.emoji}</div>
-            <div class="card-body">
-              <span class="card-tag">${b.estilo}</span>
-              <div class="card-name">${b.nome}</div>
-              <p class="card-desc">${b.descricao}</p>
-              <div class="card-price">A partir de R$ ${b.preco.toFixed(2).replace('.',',')}</div>
-            </div>
-          </div>`).join('');
+    // Fallback: exibe cards com imagens reais da pasta assets/img quando o back não está disponível
+    const exemplos = [
+      { 
+        nome: 'Casal Funko Pop', 
+        estilo: 'Funko Pop', 
+        descricao: 'Dois personagens personalizados com roupas e acessórios únicos.', 
+        preco: 70, 
+        imagem: 'assets/img/casal-funko.jpeg' 
+      },
+      { 
+        nome: 'Pet Chibi', 
+        estilo: 'Chibi', 
+        descricao: 'Seu bichinho de estimação em versão fofa e estilizada.', 
+        preco: 25, 
+        imagem: 'assets/img/pet-chibi.jpeg' 
+      },
+      { 
+        nome: 'Herói Funko', 
+        estilo: 'Funko Pop', 
+        descricao: 'Personagem de quadrinhos ou série favorita em biscuit.', 
+        preco: 35, 
+        imagem: 'assets/img/heroi-funko.jpeg' 
+      },
+      { 
+        nome: 'Personagem Chibi', 
+        estilo: 'Chibi', 
+        descricao: 'Estilo japonês chibi para qualquer personagem ou pessoa real.', 
+        preco: 25, 
+        imagem: 'assets/img/personagem-chibi.jpeg' 
+      },
+      { 
+        nome: 'Boneco Totalmente Personalizado', 
+        estilo: 'Personalizado', 
+        descricao: 'Sua ideia do seu jeito: posições especiais, cenários complexos ou outros estilos de escultura.', 
+        preco: 0, 
+        imagem: 'assets/img/outros.jpeg' 
       }
+
+    ];
+
+    grid.innerHTML = exemplos.map(b => `
+      <div class="card">
+        <div class="card-img">
+          <img src="${b.imagem}" alt="${b.nome}" style="width:100%; height:100%; object-fit:cover;" />
+        </div>
+        <div class="card-body">
+          <span class="card-tag">${b.estilo}</span>
+          <div class="card-name">${b.nome}</div>
+          <p class="card-desc">${b.descricao}</p>
+          <div class="card-price">${
+            b.preco
+              ? `A partir de R$ ${b.preco.toFixed(2).replace('.',',')}`
+              : 'Valor a combinar'
+          }</div>
+        </div>
+      </div>`).join('');
+    }
     }
 
     carregarVitrine();
