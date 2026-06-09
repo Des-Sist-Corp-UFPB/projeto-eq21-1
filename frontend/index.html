@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trokets – Bonecos Personalizados de Biscuit</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet" />
+  <style>
+    /* ===== TOKENS ===== */
+    :root {
+      --cream:   #DDC595;
+      --cream-light: #F0E0BB;
+      --cream-dark:  #C8AA75;
+      --green:   #4D6E26;
+      --green-dark:  #3A5219;
+      --green-light: #6A9435;
+      --offwhite: #FAF5EC;
+      --dark:    #1C1C1C;
+      --gray:    #6B6B6B;
+      --radius:  18px;
+      --shadow:  0 4px 24px rgba(77,110,38,.13);
+    }
+
+    /* ===== RESET ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: var(--offwhite);
+      color: var(--dark);
+      overflow-x: hidden;
+    }
+
+    /* ===== NAVBAR ===== */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 5%;
+      background: rgba(250,245,236,.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 2px solid var(--cream);
+    }
+    .nav-logo img { height: 52px; }
+    .nav-links { display: flex; gap: 28px; list-style: none; }
+    .nav-links a {
+      text-decoration: none;
+      font-weight: 700;
+      font-size: .95rem;
+      color: var(--green);
+      letter-spacing: .03em;
+      transition: color .2s;
+    }
+    .nav-links a:hover { color: var(--green-dark); }
+    .nav-cta {
+      background: var(--green);
+      color: #fff !important;
+      padding: 9px 22px;
+      border-radius: 50px;
+      transition: background .2s !important;
+    }
+    .nav-cta:hover { background: var(--green-dark) !important; }
+
+    /* ===== HERO ===== */
+    .hero {
+      min-height: 100vh;
+      background: linear-gradient(135deg, var(--offwhite) 55%, var(--cream-light) 100%);
+      display: flex;
+      align-items: center;
+      padding: 110px 5% 60px;
+      gap: 40px;
+      flex-wrap: wrap;
+    }
+    .hero-text { flex: 1 1 340px; }
+    .hero-badge {
+      display: inline-block;
+      background: var(--cream);
+      color: var(--green-dark);
+      font-weight: 700;
+      font-size: .8rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      padding: 5px 16px;
+      border-radius: 50px;
+      margin-bottom: 20px;
+    }
+    .hero-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.4rem, 5vw, 4rem);
+      line-height: 1.1;
+      color: var(--green-dark);
+    }
+    .hero-title span { color: var(--cream-dark); }
+    .hero-sub {
+      margin: 20px 0 34px;
+      font-size: 1.08rem;
+      color: var(--gray);
+      max-width: 440px;
+      line-height: 1.7;
+    }
+    .hero-btns { display: flex; gap: 14px; flex-wrap: wrap; }
+    .btn-primary {
+      background: var(--green);
+      color: #fff;
+      border: none;
+      padding: 14px 32px;
+      border-radius: 50px;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 800;
+      font-size: 1rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background .2s, transform .15s;
+      display: inline-block;
+    }
+    .btn-primary:hover { background: var(--green-dark); transform: translateY(-2px); }
+    .btn-outline {
+      background: transparent;
+      color: var(--green);
+      border: 2px solid var(--green);
+      padding: 13px 30px;
+      border-radius: 50px;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 800;
+      font-size: 1rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all .2s;
+      display: inline-block;
+    }
+    .btn-outline:hover { background: var(--green); color: #fff; }
+
+    .hero-visual {
+      flex: 1 1 300px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .hero-logo-big {
+      width: min(340px, 90vw);
+      filter: drop-shadow(0 12px 40px rgba(77,110,38,.22));
+      animation: float 4s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-14px); }
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 640px) {
+      .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a class="nav-logo" href="#"><img src="image-removebg-preview__2_.png" alt="Trokets" /></a>
+    <ul class="nav-links">
+      <li><a href="#vitrine">Vitrine</a></li>
+      <li><a href="#pedido">Encomendar</a></li>
+      <li><a href="#info">Preços & Prazo</a></li>
+      <li><a href="https://instagram.com/trokets" target="_blank">Instagram</a></li>
+      <li><a href="#pedido" class="nav-cta">Fazer Pedido</a></li>
+    </ul>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-text">
+      <span class="hero-badge">✦ Feitos à mão com amor</span>
+      <h1 class="hero-title">Seu personagem<br>em <span>biscuit</span>,<br>do seu jeito</h1>
+      <p class="hero-sub">
+        Bonecos únicos e personalizados no estilo Funko Pop ou Chibi. 
+        Presenteie quem você ama com algo que só existe no mundo inteiro.
+      </p>
+      <div class="hero-btns">
+        <a href="#pedido" class="btn-primary">🎨 Fazer Encomenda</a>
+        <a href="#vitrine" class="btn-outline">Ver Vitrine</a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <img class="hero-logo-big" src="image-removebg-preview__2_.png" alt="Trokets logo" />
+    </div>
+  </section>
+
+</body>
+</html>
