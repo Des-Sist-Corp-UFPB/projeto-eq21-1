@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fazer Pedido – Trokets</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --cream:        #DDC595; --cream-light:  #F0E0BB; --cream-dark:   #C8AA75;
+      --green:        #4D6E26; --green-dark:   #3A5219; --green-light:  #6A9435;
+      --offwhite:     #FAF5EC; --dark:         #1C1C1C; --gray:         #6B6B6B;
+      --gray-light:   #E8E3DA; --danger:       #C0392B; --radius:       18px;
+      --shadow:       0 4px 24px rgba(77,110,38,.12);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Nunito', sans-serif; background: var(--offwhite); color: var(--dark); min-height: 100vh; }
+    nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 14px 5%; background: rgba(250,245,236,.93); backdrop-filter: blur(12px); border-bottom: 2px solid var(--cream); }
+    .nav-logo img { height: 48px; }
+    .nav-back { display: flex; align-items: center; gap: 8px; text-decoration: none; font-weight: 700; font-size: .9rem; color: var(--green); }
+    .page-header { padding: 120px 5% 48px; text-align: center; background: linear-gradient(160deg, var(--offwhite) 60%, var(--cream-light) 100%); }
+    .page-badge { display: inline-block; background: var(--cream); color: var(--green-dark); font-weight: 700; font-size: .78rem; letter-spacing: .12em; text-transform: uppercase; padding: 5px 16px; border-radius: 50px; margin-bottom: 16px; }
+    .page-title { font-family: 'Playfair Display', serif; font-size: clamp(2rem, 4vw, 3rem); color: var(--green-dark); margin-bottom: 12px; }
+    .page-sub { color: var(--gray); font-size: 1rem; max-width: 500px; margin: 0 auto; line-height: 1.7; }
+    .form-layout { max-width: 780px; margin: 0 auto; padding: 0 5% 80px; }
+    .steps { display: flex; align-items: center; gap: 0; margin: 40px 0 36px; }
+    .step { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; }
+    .step-circle { width: 36px; height: 36px; border-radius: 50%; background: var(--gray-light); color: var(--gray); font-weight: 800; font-size: .9rem; display: flex; align-items: center; justify-content: center; border: 2px solid var(--gray-light); }
+    .step-circle.active { background: var(--green); color: #fff; border-color: var(--green); }
+    .step-label { font-size: .72rem; font-weight: 700; color: var(--gray); text-align: center; }
+    .step-label.active { color: var(--green); }
+    .step-line { flex: 1; height: 2px; background: var(--gray-light); margin-bottom: 22px; }
+    .form-card { background: #fff; border-radius: var(--radius); box-shadow: var(--shadow); padding: 32px 36px; margin-bottom: 20px; }
+    .form-card-title { font-family: 'Playfair Display', serif; font-size: 1.3rem; color: var(--green-dark); margin-bottom: 4px; }
+    .form-card-sub { font-size: .88rem; color: var(--gray); margin-bottom: 24px; }
+    .field { margin-bottom: 20px; }
+    .field label { display: block; font-size: .85rem; font-weight: 700; color: var(--dark); margin-bottom: 7px; }
+    .field input, .field textarea { width: 100%; padding: 12px 16px; border: 2px solid var(--gray-light); border-radius: 12px; outline: none; }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .btn-primary { width: 100%; background: var(--green); color: #fff; border: none; padding: 16px 32px; border-radius: 50px; font-weight: 900; font-size: 1.05rem; cursor: pointer; margin-top: 24px; }
+    .estilo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .estilo-card { border: 2px solid var(--gray-light); border-radius: 14px; padding: 16px 12px; text-align: center; cursor: pointer; }
+    .estilo-card input { display: none; }
+    .posicao-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .posicao-btn { border: 2px solid var(--gray-light); border-radius: 10px; padding: 10px 14px; cursor: pointer; }
+    .posicao-btn input { display: none; }
+  </style>
+</head>
+<body>
+  <nav>
+    <a class="nav-logo" href="index.html"><img src="../assets/img/logo.png" alt="Trokets" /></a>
+    <a class="nav-back" href="index.html">Voltar à loja</a>
+  </nav>
+
+  <div class="page-header">
+    <span class="page-badge">✦ Encomenda personalizada</span>
+    <h1 class="page-title">Fazer meu pedido</h1>
+    <p class="page-sub">Preencha os detalhes do seu personagem.</p>
+  </div>
+
+  <div class="form-layout">
+    <div class="steps">
+      <div class="step">
+        <div class="step-circle active">1</div>
+        <span class="step-label active">Personagem</span>
+      </div>
+      <div class="step-line"></div>
+      <div class="step">
+        <div class="step-circle">2</div>
+        <span class="step-label">Referências</span>
+      </div>
+      <div class="step-line"></div>
+      <div class="step">
+        <div class="step-circle">3</div>
+        <span class="step-label">Confirmar</span>
+      </div>
+    </div>
+
+    <div id="passo-1">
+      <div class="form-card">
+        <div class="form-card-title">Sobre o personagem</div>
+        <div class="form-card-sub">Nos conte quem vai virar boneco! 🎭</div>
+        <div class="field">
+          <label>Nome do personagem *</label>
+          <input type="text" id="nome" placeholder="Ex: Naruto Uzumaki..." />
+        </div>
+        <div class="field">
+          <label>Descrição *</label>
+          <textarea id="descricao" placeholder="Características físicas, roupa..."></textarea>
+        </div>
+        <div class="field">
+          <label>Posição / Pose do boneco *</label>
+          <div class="posicao-grid">
+            <label class="posicao-btn"><input type="radio" name="posicao" value="Em pé" /> 🧍 Em pé</label>
+            <label class="posicao-btn"><input type="radio" name="posicao" value="Sentado" /> 🪑 Sentado</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-card">
+        <div class="form-card-title">Estilo de modelagem</div>
+        <div class="estilo-grid">
+          <label class="estilo-card"><input type="radio" name="estilo" value="Funko Pop" /> 🎭 Funko Pop</label>
+          <label class="estilo-card"><input type="radio" name="estilo" value="Chibi" /> 🌸 Chibi</label>
+        </div>
+      </div>
+
+      <div class="form-card">
+        <div class="form-card-title">Seus dados para contato</div>
+        <div class="field-row">
+          <div class="field"><label>Seu nome *</label><input type="text" id="cliente" /></div>
+          <div class="field"><label>Seu WhatsApp *</label><input type="tel" id="telefone" /></div>
+        </div>
+      </div>
+      <button class="btn-primary">Próximo: Fotos de referência →</button>
+    </div>
+  </div>
+</body>
+</html>
