@@ -6,57 +6,730 @@
   <title>Trokets – Bonecos Personalizados de Biscuit</title>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet" />
   <style>
-    /* ... (Todos os estilos anteriores se mantêm ativos) ... */
-    :root { --cream: #DDC595; --cream-light: #F0E0BB; --cream-dark: #C8AA75; --green: #4D6E26; --green-dark: #3A5219; --green-light: #6A9435; --offwhite: #FAF5EC; --dark: #1C1C1C; --gray: #6B6B6B; --radius: 18px; --shadow: 0 4px 24px rgba(77,110,38,.13); }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Nunito', sans-serif; background: var(--offwhite); color: var(--dark); overflow-x: hidden; }
-    nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 14px 5%; background: rgba(250,245,236,.92); backdrop-filter: blur(12px); border-bottom: 2px solid var(--cream); }
-    .nav-logo img { height: 52px; } .nav-links { display: flex; gap: 28px; list-style: none; } .nav-links a { text-decoration: none; font-weight: 700; color: var(--green); }
-    .hero { min-height: 100vh; background: linear-gradient(135deg, var(--offwhite) 55%, var(--cream-light) 100%); display: flex; align-items: center; padding: 110px 5% 60px; gap: 40px; flex-wrap: wrap; }
-    .btn-primary { background: var(--green); color: #fff; border: none; padding: 14px 32px; border-radius: 50px; text-decoration: none; display: inline-block; }
-    .precos { padding: 80px 5%; background: var(--cream-light); } .precos-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; }
-    .preco-card { background: #fff; border-radius: var(--radius); padding: 32px 28px; }
+    /* ===== TOKENS ===== */
+    :root {
+      --cream:   #DDC595;
+      --cream-light: #F0E0BB;
+      --cream-dark:  #C8AA75;
+      --green:   #4D6E26;
+      --green-dark:  #3A5219;
+      --green-light: #6A9435;
+      --offwhite: #FAF5EC;
+      --dark:    #1C1C1C;
+      --gray:    #6B6B6B;
+      --radius:  18px;
+      --shadow:  0 4px 24px rgba(77,110,38,.13);
+    }
 
-    /* ===== ESTILOS ADICIONADOS PARA PAGAMENTO ===== */
-    .info-section { padding: 80px 5%; background: var(--offwhite); }
+    /* ===== RESET ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: var(--offwhite);
+      color: var(--dark);
+      overflow-x: hidden;
+    }
+
+    /* ===== NAVBAR ===== */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 5%;
+      background: rgba(250,245,236,.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 2px solid var(--cream);
+    }
+    .nav-logo img { height: 52px; }
+    .nav-links { display: flex; gap: 28px; list-style: none; }
+    .nav-links a {
+      text-decoration: none;
+      font-weight: 700;
+      font-size: .95rem;
+      color: var(--green);
+      letter-spacing: .03em;
+      transition: color .2s;
+    }
+    .nav-links a:hover { color: var(--green-dark); }
+    .nav-cta {
+      background: var(--green);
+      color: #fff !important;
+      padding: 9px 22px;
+      border-radius: 50px;
+      transition: background .2s !important;
+    }
+    .nav-cta:hover { background: var(--green-dark) !important; }
+
+    /* ===== HERO ===== */
+    .hero {
+      min-height: 100vh;
+      background: linear-gradient(135deg, var(--offwhite) 55%, var(--cream-light) 100%);
+      display: flex;
+      align-items: center;
+      padding: 110px 5% 60px;
+      gap: 40px;
+      flex-wrap: wrap;
+    }
+    .hero-text { flex: 1 1 340px; }
+    .hero-badge {
+      display: inline-block;
+      background: var(--cream);
+      color: var(--green-dark);
+      font-weight: 700;
+      font-size: .8rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      padding: 5px 16px;
+      border-radius: 50px;
+      margin-bottom: 20px;
+    }
+    .hero-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.4rem, 5vw, 4rem);
+      line-height: 1.1;
+      color: var(--green-dark);
+    }
+    .hero-title span { color: var(--cream-dark); }
+    .hero-sub {
+      margin: 20px 0 34px;
+      font-size: 1.08rem;
+      color: var(--gray);
+      max-width: 440px;
+      line-height: 1.7;
+    }
+    .hero-btns { display: flex; gap: 14px; flex-wrap: wrap; }
+    .btn-primary {
+      background: var(--green);
+      color: #fff;
+      border: none;
+      padding: 14px 32px;
+      border-radius: 50px;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 800;
+      font-size: 1rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background .2s, transform .15s;
+      display: inline-block;
+    }
+    .btn-primary:hover { background: var(--green-dark); transform: translateY(-2px); }
+    .btn-outline {
+      background: transparent;
+      color: var(--green);
+      border: 2px solid var(--green);
+      padding: 13px 30px;
+      border-radius: 50px;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 800;
+      font-size: 1rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all .2s;
+      display: inline-block;
+    }
+    .btn-outline:hover { background: var(--green); color: #fff; }
+
+    .hero-visual {
+      flex: 1 1 300px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .hero-logo-big {
+      width: min(340px, 90vw);
+      filter: drop-shadow(0 12px 40px rgba(77,110,38,.22));
+      animation: float 4s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-14px); }
+    }
+
+    /* ===== SECTION TITLES ===== */
+    .section-label {
+      font-size: .78rem;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--green);
+      margin-bottom: 8px;
+    }
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+      color: var(--green-dark);
+      margin-bottom: 14px;
+    }
+    .section-sub {
+      color: var(--gray);
+      font-size: 1rem;
+      max-width: 540px;
+      line-height: 1.7;
+    }
+
+    /* ===== VITRINE ===== */
+    .vitrine {
+      padding: 80px 5%;
+      background: var(--offwhite);
+    }
+    .vitrine-header { margin-bottom: 48px; }
+
+    .vitrine-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 28px;
+    }
+    .card {
+      background: #fff;
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      transition: transform .22s, box-shadow .22s;
+      cursor: pointer;
+    }
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 12px 40px rgba(77,110,38,.18);
+    }
+    .card-img {
+      width: 100%;
+      aspect-ratio: 1/1;
+      object-fit: cover;
+      background: var(--cream-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3.5rem;
+    }
+    .card-body { padding: 18px 20px 22px; }
+    .card-tag {
+      display: inline-block;
+      background: var(--cream);
+      color: var(--green-dark);
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: 3px 11px;
+      border-radius: 50px;
+      margin-bottom: 9px;
+    }
+    .card-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem;
+      color: var(--dark);
+      margin-bottom: 6px;
+    }
+    .card-desc {
+      font-size: .88rem;
+      color: var(--gray);
+      line-height: 1.55;
+      margin-bottom: 14px;
+    }
+    .card-price {
+      font-weight: 900;
+      font-size: 1.1rem;
+      color: var(--green);
+    }
+
+    /* ===== LOADING SKELETON ===== */
+    .skeleton {
+      background: linear-gradient(90deg, #eee 25%, #f8f8f8 50%, #eee 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+      border-radius: 8px;
+    }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+    /* ===== EMPTY STATE ===== */
+    .empty-state {
+      grid-column: 1/-1;
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--gray);
+    }
+    .empty-state .icon { font-size: 3rem; margin-bottom: 12px; }
+
+    /* ===== DESTAQUES FLUTUANTES ===== */
+    .info-strip {
+      background: var(--green);
+      color: #fff;
+      display: flex;
+      gap: 0;
+      overflow: hidden;
+    }
+    .info-strip-item {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 18px 16px;
+      border-right: 1px solid rgba(255,255,255,.2);
+      font-size: .9rem;
+      font-weight: 700;
+      text-align: center;
+    }
+    .info-strip-item:last-child { border-right: none; }
+    .info-strip-item .icon { font-size: 1.4rem; }
+
+    /* ===== PREÇOS ===== */
+    .precos {
+      padding: 80px 5%;
+      background: var(--cream-light);
+    }
+    .precos-header { margin-bottom: 48px; }
+    .precos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 24px;
+      max-width: 900px;
+    }
+    .preco-card {
+      background: #fff;
+      border-radius: var(--radius);
+      padding: 32px 28px;
+      box-shadow: var(--shadow);
+      position: relative;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .preco-card:hover { transform: translateY(-5px); box-shadow: 0 12px 40px rgba(77,110,38,.18); }
+    .preco-card.destaque {
+      border: 3px solid var(--green);
+    }
+    .preco-badge-destaque {
+      position: absolute;
+      top: -14px; left: 50%; transform: translateX(-50%);
+      background: var(--green);
+      color: #fff;
+      font-size: .72rem;
+      font-weight: 800;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      padding: 4px 16px;
+      border-radius: 50px;
+      white-space: nowrap;
+    }
+    .preco-icon { font-size: 2.8rem; margin-bottom: 14px; display: block; }
+    .preco-nome {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      color: var(--green-dark);
+      margin-bottom: 6px;
+    }
+    .preco-desc {
+      font-size: .88rem;
+      color: var(--gray);
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+    .preco-valor {
+      font-size: 2rem;
+      font-weight: 900;
+      color: var(--green);
+      margin-bottom: 4px;
+    }
+    .preco-valor span { font-size: 1rem; font-weight: 700; }
+    .preco-obs { font-size: .78rem; color: var(--gray); }
+
+    /* ===== PAGAMENTO & PRAZO ===== */
+    .info-section {
+      padding: 80px 5%;
+      background: var(--offwhite);
+    }
     .info-section-header { margin-bottom: 48px; }
-    .info-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; max-width: 900px; }
-    .info-card { background: #fff; border-radius: var(--radius); padding: 28px 24px; box-shadow: var(--shadow); display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
-    .info-card-icon { width: 48px; height: 48px; background: var(--cream-light); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; }
-    .info-card-title { font-weight: 800; font-size: 1rem; color: var(--dark); }
-    .info-card-desc { font-size: .88rem; color: var(--gray); line-height: 1.6; }
-    .info-card-highlight { font-size: 1.8rem; font-weight: 900; color: var(--green); line-height: 1; }
+    .info-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      max-width: 900px;
+    }
+    .info-card {
+      background: #fff;
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .info-card-icon {
+      width: 48px; height: 48px;
+      background: var(--cream-light);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.6rem;
+    }
+    .info-card-title {
+      font-weight: 800;
+      font-size: 1rem;
+      color: var(--dark);
+    }
+    .info-card-desc {
+      font-size: .88rem;
+      color: var(--gray);
+      line-height: 1.6;
+    }
+    .info-card-highlight {
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: var(--green);
+      line-height: 1;
+    }
+
+    /* ===== CTA BANNER ===== */
+    .cta-banner {
+      background: var(--green);
+      padding: 70px 5%;
+      text-align: center;
+    }
+    .cta-banner h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+      color: #fff;
+      margin-bottom: 12px;
+    }
+    .cta-banner p {
+      color: rgba(255,255,255,.8);
+      font-size: 1rem;
+      margin-bottom: 32px;
+      max-width: 500px;
+      margin-left: auto; margin-right: auto;
+      line-height: 1.7;
+    }
+    .btn-cream {
+      background: var(--cream);
+      color: var(--green-dark);
+      border: none;
+      padding: 16px 40px;
+      border-radius: 50px;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 900;
+      font-size: 1.05rem;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: background .2s, transform .15s;
+    }
+    .btn-cream:hover { background: var(--cream-dark); transform: translateY(-2px); }
+
+    /* ===== FOOTER ===== */
+    footer {
+      background: var(--green-dark);
+      color: rgba(255,255,255,.75);
+      padding: 56px 5% 32px;
+    }
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 48px;
+      margin-bottom: 48px;
+    }
+    .footer-brand img { height: 48px; margin-bottom: 16px; filter: brightness(0) invert(1); }
+    .footer-brand p {
+      font-size: .88rem;
+      line-height: 1.7;
+      max-width: 280px;
+    }
+    .footer-social {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+    }
+    .social-btn {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.12);
+      display: flex; align-items: center; justify-content: center;
+      text-decoration: none;
+      font-size: 1.1rem;
+      color: #fff;
+      transition: background .2s, transform .15s;
+    }
+    .social-btn:hover { background: var(--cream); transform: translateY(-2px); }
+    .footer-col-title {
+      font-weight: 800;
+      font-size: .82rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--cream);
+      margin-bottom: 16px;
+    }
+    .footer-links { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .footer-links a {
+      color: rgba(255,255,255,.7);
+      text-decoration: none;
+      font-size: .9rem;
+      font-weight: 600;
+      transition: color .2s;
+    }
+    .footer-links a:hover { color: var(--cream); }
+    .footer-bottom {
+      border-top: 1px solid rgba(255,255,255,.12);
+      padding-top: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: .82rem;
+    }
+    .footer-bottom a { color: var(--cream); text-decoration: none; }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 640px) {
+      .nav-links { display: none; }
+      .info-strip { flex-direction: column; }
+      .info-strip-item { border-right: none; border-bottom: 1px solid rgba(255,255,255,.2); }
+      .footer-grid { grid-template-columns: 1fr; gap: 32px; }
+      .footer-bottom { flex-direction: column; text-align: center; }
+    }
   </style>
 </head>
 <body>
+
+  <!-- ===== NAVBAR ===== -->
+  <nav>
+    <a class="nav-logo" href="#"><img src="image-removebg-preview__2_.png" alt="Trokets" /></a>
+    <ul class="nav-links">
+      <li><a href="#vitrine">Vitrine</a></li>
+      <li><a href="#precos">Preços</a></li>
+      <li><a href="#info">Pagamento</a></li>
+      <li><a href="https://instagram.com/trokets" target="_blank">Instagram</a></li>
+      <li><a href="pages/pedido.html" class="nav-cta">Fazer Pedido</a></li>
+    </ul>
+  </nav>
+
+  <!-- ===== HERO ===== -->
+  <section class="hero">
+    <div class="hero-text">
+      <span class="hero-badge">✦ Feitos à mão com amor</span>
+      <h1 class="hero-title">Seu personagem<br>em <span>biscuit</span>,<br>do seu jeito</h1>
+      <p class="hero-sub">
+        Bonecos únicos e personalizados no estilo Funko Pop ou Chibi. 
+        Presenteie quem você ama com algo que só existe no mundo inteiro.
+      </p>
+      <div class="hero-btns">
+        <a href="pages/pedido.html" class="btn-primary">🎨 Fazer Encomenda</a>
+        <a href="#vitrine" class="btn-outline">Ver Vitrine</a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <img class="hero-logo-big" src="image-removebg-preview__2_.png" alt="Trokets logo" />
+    </div>
+  </section>
+
+  <!-- ===== INFO STRIP ===== -->
+  <div class="info-strip">
+    <div class="info-strip-item"><span class="icon">🧱</span> Biscuit Artesanal</div>
+    <div class="info-strip-item"><span class="icon">⏱️</span> Entrega em 10–15 dias</div>
+    <div class="info-strip-item"><span class="icon">💳</span> Pix · Cartão · Espécie</div>
+    <div class="info-strip-item"><span class="icon">📦</span> Pedido 100% personalizado</div>
+  </div>
+
+  <!-- ===== VITRINE ===== -->
+  <section class="vitrine" id="vitrine">
+    <div class="vitrine-header">
+      <p class="section-label">✦ Nossos trabalhos</p>
+      <h2 class="section-title">Vitrine de Bonecos</h2>
+      <p class="section-sub">Cada peça é única e feita à mão. Veja alguns dos nossos trabalhos e inspire-se para o seu pedido.</p>
+    </div>
+    <div class="vitrine-grid" id="vitrine-grid">
+      <!-- Skeletons enquanto carrega -->
+      <div class="card skeleton" style="height:340px"></div>
+      <div class="card skeleton" style="height:340px"></div>
+      <div class="card skeleton" style="height:340px"></div>
+      <div class="card skeleton" style="height:340px"></div>
+    </div>
+  </section>
+
+  <!-- ===== PREÇOS ===== -->
+  <section class="precos" id="precos">
+    <div class="precos-header">
+      <p class="section-label">✦ Investimento</p>
+      <h2 class="section-title">Preços & Estilos</h2>
+      <p class="section-sub">Escolha o estilo que mais combina com o seu personagem. Cada boneco é único e feito com muito carinho.</p>
+    </div>
+    <div class="precos-grid">
+
+      <div class="preco-card">
+        <span class="preco-icon">🌸</span>
+        <div class="preco-nome">Chibi</div>
+        <p class="preco-desc">Estilo japonês fofo e compacto. Cabeça grande, corpo pequeninho — perfeito para personagens kawaii.</p>
+        <div class="preco-valor"><span>A partir de </span>R$ 25</div>
+        <div class="preco-obs">Valor final a combinar conforme detalhes</div>
+      </div>
+
+      <div class="preco-card destaque">
+        <div class="preco-badge-destaque">⭐ Mais pedido</div>
+        <span class="preco-icon">🎭</span>
+        <div class="preco-nome">Funko Pop</div>
+        <p class="preco-desc">Estilo icônico com cabeça grande e olhos pretos. Ideal para heróis, personagens de séries, games e casais.</p>
+        <div class="preco-valor"><span>A partir de </span>R$ 35</div>
+        <div class="preco-obs">Valor final a combinar conforme detalhes</div>
+      </div>
+
+      <div class="preco-card">
+        <span class="preco-icon">✨</span>
+        <div class="preco-nome">Outro estilo</div>
+        <p class="preco-desc">Tem uma ideia diferente em mente? Pode ser realista, anime, OC ou qualquer outro estilo. Vamos conversar!</p>
+        <div class="preco-valor" style="font-size:1.3rem;">A combinar</div>
+        <div class="preco-obs">Entre em contato para orçamento</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===== PAGAMENTO & PRAZO ===== -->
   <section class="info-section" id="info">
     <div class="info-section-header">
       <p class="section-label">✦ Como funciona</p>
       <h2 class="section-title">Pagamento & Prazo</h2>
+      <p class="section-sub">Tudo simples e combinado direto pelo WhatsApp, sem complicação.</p>
     </div>
     <div class="info-cards">
+
       <div class="info-card">
         <div class="info-card-icon">⚡</div>
         <div class="info-card-title">Pix</div>
-        <div class="info-card-desc">Confirme o pedido e pague na hora pelo Pix.</div>
+        <div class="info-card-desc">Pagamento instantâneo. Confirme o pedido e pague na hora pelo Pix.</div>
       </div>
+
       <div class="info-card">
         <div class="info-card-icon">💳</div>
         <div class="info-card-title">Cartão</div>
-        <div class="info-card-desc">Débito ou crédito. Parcele sem juros.</div>
+        <div class="info-card-desc">Débito ou crédito. Parcele sem juros — consulte condições pelo WhatsApp.</div>
       </div>
+
+      <div class="info-card">
+        <div class="info-card-icon">💵</div>
+        <div class="info-card-title">Espécie</div>
+        <div class="info-card-desc">Pagamento em dinheiro na entrega ou na retirada — combine pelo WhatsApp.</div>
+      </div>
+
       <div class="info-card">
         <div class="info-card-icon">📦</div>
         <div class="info-card-title">Prazo de entrega</div>
         <div class="info-card-highlight">10–15</div>
-        <div class="info-card-desc">dias úteis após a confirmação.</div>
+        <div class="info-card-desc">dias úteis após a confirmação e pagamento do pedido.</div>
       </div>
+
     </div>
   </section>
 
+  <!-- ===== CTA BANNER ===== -->
+  <section class="cta-banner">
+    <h2>Pronto para ter seu boneco? 🌵</h2>
+    <p>Faça sua encomenda agora e receba um boneco único, feito à mão só para você!</p>
+    <a href="pages/pedido.html" class="btn-cream">🎨 Quero meu boneco!</a>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer>
+    <div class="footer-grid">
+
+      <div class="footer-brand">
+        <img src="assets/img/logo.png" alt="Trokets" />
+        <p>Bonecos personalizados de biscuit feitos à mão com amor. Cada peça é única, assim como quem a encomenda.</p>
+        <div class="footer-social">
+          <a class="social-btn" href="https://instagram.com/trokets" target="_blank" title="Instagram">📸</a>
+          <a class="social-btn" href="https://wa.me/5584996980815" target="_blank" title="WhatsApp">💬</a>
+        </div>
+      </div>
+
+      <div>
+        <div class="footer-col-title">Navegação</div>
+        <ul class="footer-links">
+          <li><a href="#vitrine">Vitrine</a></li>
+          <li><a href="#precos">Preços</a></li>
+          <li><a href="#info">Pagamento</a></li>
+          <li><a href="pages/pedido.html">Fazer pedido</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="footer-col-title">Contato</div>
+        <ul class="footer-links">
+          <li><a href="https://wa.me/5584996980815" target="_blank">WhatsApp</a></li>
+          <li><a href="https://instagram.com/trokets" target="_blank">@trokets</a></li>
+        </ul>
+        <div class="footer-col-title" style="margin-top:24px;">Horário</div>
+        <ul class="footer-links">
+          <li><a href="#">Seg–Sex: 9h–18h</a></li>
+          <li><a href="#">Sáb: 9h–13h</a></li>
+        </ul>
+      </div>
+
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 Trokets. Todos os direitos reservados.</span>
+      <a href="https://instagram.com/trokets" target="_blank">Feito com 🌵 e biscuit</a>
+    </div>
+  </footer>
+
   <script>
-    async function carregarVitrine() { console.log("Vitrine carregada"); }
+    // ===== VITRINE: busca do back-end Java (GET /api/bonecos) =====
+    const API_BASE = 'http://localhost:8080'; // ajuste para sua URL
+
+    async function carregarVitrine() {
+      const grid = document.getElementById('vitrine-grid');
+      try {
+    const res = await fetch(`${API_BASE}/api/funkos`);
+        if (!res.ok) throw new Error('Sem resposta do servidor');
+        const bonecos = await res.json();
+
+        if (!bonecos.length) {
+          grid.innerHTML = `
+            <div class="empty-state">
+              <div class="icon">🎭</div>
+              <p>Nenhum boneco cadastrado ainda. Em breve novidades!</p>
+            </div>`;
+          return;
+        }
+
+        grid.innerHTML = bonecos.map(b => `
+          <div class="card">
+            <div class="card-img">
+              ${b.imagemUrl
+                ? `<img src="${b.imagemUrl}" alt="${b.nome}" style="width:100%;height:100%;object-fit:cover;" />`
+                : '🪆'}
+            </div>
+            <div class="card-body">
+              <span class="card-tag">${b.franquia || 'Personalizado'}</span>
+              <div class="card-name">${b.nome}</div>
+              <p class="card-desc">${b.descricao || ''}</p>
+              <div class="card-price">${
+                b.preco
+                  ? `A partir de R$ ${Number(b.preco).toFixed(2).replace('.',',')}`
+                  : 'Valor a combinar'
+              }</div>
+            </div>
+          </div>`).join('');
+
+      } catch (e) {
+        // Fallback: exibe cards de exemplo quando o back não está disponível
+        const exemplos = [
+          { nome: 'Casal Funko Pop', estilo: 'Funko Pop', descricao: 'Dois personagens personalizados com roupas e acessórios únicos.', preco: 70, emoji: '👫' },
+          { nome: 'Pet Chibi', estilo: 'Chibi', descricao: 'Seu bichinho de estimação em versão fofa e estilizada.', preco: 25, emoji: '🐾' },
+          { nome: 'Herói Funko', estilo: 'Funko Pop', descricao: 'Personagem de quadrinhos ou série favorita em biscuit.', preco: 35, emoji: '🦸' },
+          { nome: 'Personagem Chibi', estilo: 'Chibi', descricao: 'Estilo japonês chibi para qualquer personagem ou pessoa real.', preco: 25, emoji: '🌸' },
+        ];
+        grid.innerHTML = exemplos.map(b => `
+          <div class="card">
+            <div class="card-img" style="font-size:4rem;display:flex;align-items:center;justify-content:center;">${b.emoji}</div>
+            <div class="card-body">
+              <span class="card-tag">${b.estilo}</span>
+              <div class="card-name">${b.nome}</div>
+              <p class="card-desc">${b.descricao}</p>
+              <div class="card-price">A partir de R$ ${b.preco.toFixed(2).replace('.',',')}</div>
+            </div>
+          </div>`).join('');
+      }
+    }
+
     carregarVitrine();
   </script>
+
 </body>
 </html>
