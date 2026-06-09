@@ -24,15 +24,15 @@ services:
     image: postgres:16-alpine
     container_name: mercado-postgres-dev
     environment:
-      POSTGRES_DB: mercado_dev
-      POSTGRES_USER: mercado
-      POSTGRES_PASSWORD: mercado123
+      POSTGRES_DB: eq21
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
       - postgres-dev-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U mercado -d mercado_dev"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d eq21"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -49,9 +49,13 @@ services:
     container_name: mercado-app-dev
     environment:
       SPRING_PROFILES_ACTIVE: dev
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/mercado_dev
-      SPRING_DATASOURCE_USERNAME: mercado
-      SPRING_DATASOURCE_PASSWORD: mercado123
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/eq21
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET: ${MINIO_SECRET}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS}
     ports:
       - "8080:8080"
     volumes:
