@@ -45,7 +45,7 @@ RUN chown mercado:mercado app.jar
 # Trocar para usuário não-root
 USER mercado
 
-EXPOSE 8080
+EXPOSE 8121
 
 # Health check: o Actuator expõe /actuator/health
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
