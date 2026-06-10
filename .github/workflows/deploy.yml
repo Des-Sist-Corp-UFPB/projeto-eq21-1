@@ -17,11 +17,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Prepara nome da imagem (lowercase)
-        run: |
-          REPO=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')
-          echo "IMAGE=ghcr.io/${REPO}:latest" >> $GITHUB_ENV
-          REPO_BASE=$(echo "${REPO}" | sed 's/-[0-9]*$//')
-          echo "IMAGE_BASE=ghcr.io/${REPO_BASE}:latest" >> $GITHUB_ENV
+        run: echo "IMAGE=ghcr.io/$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]'):latest" >> $GITHUB_ENV
 
       - name: Login no GitHub Container Registry
         uses: docker/login-action@v3
@@ -35,15 +31,15 @@ jobs:
         with:
           context: .
           push: true
-          tags: |
-            ${{ env.IMAGE }}
-            ${{ env.IMAGE_BASE }}
+          tags: ${{ env.IMAGE }}
 
       - name: Deploy no servidor
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_DEPLOY_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
+          # Envia "actor:token" ao servidor. A chave é travada (command=),
+          # então o servidor usa esse token efêmero só para puxar a imagem do GHCR.
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
             "${{ secrets.SSH_USERNAME }}@dsc.rodrigor.com" \
             "${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}"
