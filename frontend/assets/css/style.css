@@ -1,0 +1,115 @@
+/* ===== RESPONSIVIDADE GLOBAL ===== */
+
+/* Ajustes na Navbar para Mobile (Menu Hamburguer Simples / Ocultação) */
+@media (max-width: 768px) {
+  nav {
+    padding: 10px 4%;
+  }
+  .nav-links {
+    display: none; /* Em um cenário real, aqui entraria a lógica de abrir/fechar com JS */
+  }
+  
+  /* Ajustes no Hero (Home) */
+  .hero {
+    padding-top: 100px;
+    flex-direction: column;
+    text-align: center;
+  }
+  .hero-text {
+    flex: 1 1 100%;
+  }
+  .hero-sub {
+    margin: 20px auto 30px;
+  }
+  .hero-btns {
+    justify-content: center;
+  }
+  .hero-visual {
+    order: -1; /* Joga o logo para cima do texto no mobile */
+    margin-bottom: 20px;
+  }
+  .hero-logo-big {
+    width: 220px;
+  }
+
+  /* Ajustes na Vitrine e Grids de Preço */
+  .vitrine-grid, .precos-grid {
+    grid-template-columns: 1fr !important;
+    gap: 20px;
+  }
+  
+  /* Formas de Envio / Faixa de informações empilhada */
+  .info-strip {
+    flex-direction: column;
+  }
+  .info-strip-item {
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 14px;
+  }
+  .info-strip-item:last-child {
+    border-bottom: none;
+  }
+
+  /* Painel Administrativo (Sidebar vira Topbar ou colapsa) */
+  body {
+    flex-direction: column;
+  }
+  .sidebar {
+    width: 100% !important;
+    position: relative !important;
+    height: auto !important;
+    padding: 20px;
+    flex-direction: row !important;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .sidebar-logo img {
+    margin-bottom: 0 !important;
+    height: 36px;
+  }
+  .sidebar-menu {
+    flex-direction: row !important;
+  }
+  .sidebar-footer {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    border-top: none !important;
+  }
+  .main-content {
+    margin-left: 0 !important;
+    padding: 20px 4% !important;
+  }
+  .header-panel {
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  
+  /* Tabelas Responsivas (Scroll Horizontal) */
+  .table-container {
+    overflow-x: auto;
+  }
+  table {
+    min-width: 600px;
+  }
+
+  /* Formulários de Pedido Empilhados */
+  .field-row, .estilo-grid, .posicao-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px;
+  }
+  .form-card {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-title {
+    font-size: 1.8rem !important;
+  }
+  .btn-primary, .btn-outline {
+    width: 100%;
+    text-align: center;
+  }
+}

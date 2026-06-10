@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Painel Admin – Trokets</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;900&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/css/style.css" />
+  <style>
+    :root {
+      --cream:       #DDC595;
+      --cream-light: #F0E0BB;
+      --cream-dark:  #C8AA75;
+      --green:       #4D6E26;
+      --green-dark:  #3A5219;
+      --green-light: #6A9435;
+      --offwhite:    #FAF5EC;
+      --dark:        #1C1C1C;
+      --gray:        #6B6B6B;
+      --gray-light:  #E8E3DA;
+      --danger:      #C0392B;
+      --danger-light:#fde8e8;
+      --sidebar-w:   240px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: var(--offwhite);
+      color: var(--dark);
+      display: flex;
+      min-height: 100vh;
+    }
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--green-dark);
+      color: #fff;
+      padding: 30px 20px;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      inset: 0 auto 0 0;
+    }
+    .sidebar-logo img { height: 44px; margin-bottom: 40px; }
+    .sidebar-menu { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .sidebar-link { display: flex; align-items: center; gap: 10px; padding: 12px 16px; color: rgba(255,255,255,0.7); text-decoration: none; font-weight: 700; border-radius: 10px; transition: all 0.2s; }
+    .sidebar-link.active, .sidebar-link:hover { background: var(--green); color: #fff; }
+    .sidebar-footer { margin-top: auto; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); }
+    .btn-logout { background: transparent; border: none; color: #ff9999; font-weight: 700; cursor: pointer; font-family: 'Nunito', sans-serif; }
+
+    .main-content { margin-left: var(--sidebar-w); flex: 1; padding: 40px 5%; }
+    .header-panel { display: flex; justify-content: space-between; align-items: center; margin-bottom: 34px; }
+    .panel-title { font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--green-dark); }
+    .btn-add { background: var(--green); color: #fff; border: none; padding: 12px 24px; border-radius: 50px; font-weight: 800; cursor: pointer; font-family: 'Nunito', sans-serif; transition: background 0.2s; }
+    .btn-add:hover { background: var(--green-dark); }
+
+    .table-container { background: #fff; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.04); overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th { background: var(--gray-light); padding: 16px 20px; font-weight: 800; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--gray); }
+    td { padding: 16px 20px; border-bottom: 1px solid var(--gray-light); font-size: 0.95rem; vertical-align: middle; }
+    .td-img { width: 50px; height: 50px; border-radius: 8px; object-fit: cover; background: var(--gray-light); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+    .badge-estilo { display: inline-block; background: var(--cream-light); color: var(--green-dark); font-weight: 700; font-size: 0.75rem; padding: 3px 10px; border-radius: 50px; }
+    .actions-btns { display: flex; gap: 8px; }
+    .btn-action { border: none; background: var(--gray-light); color: var(--dark); width: 34px; height: 34px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+    .btn-action.edit:hover { background: var(--cream); color: var(--green-dark); }
+    .btn-action.del:hover { background: var(--danger-light); color: var(--danger); }
+
+    /* MODAL */
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); z-index: 200; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.25s; }
+    .modal-backdrop.open { opacity: 1; pointer-events: auto; }
+    .modal-card { background: #fff; border-radius: 20px; width: 100%; max-width: 500px; padding: 32px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); transform: translateY(-20px); transition: transform 0.25s; }
+    .modal-backdrop.open .modal-card { transform: translateY(0); }
+    .modal-title { font-family: 'Playfair Display', serif; font-size: 1.4rem; margin-bottom: 20px; color: var(--green-dark); }
+    .modal-fields { display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px; }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field label { font-size: 0.85rem; font-weight: 700; }
+    .field input, .field textarea, .field select { padding: 12px; border: 2px solid var(--gray-light); border-radius: 10px; font-family: 'Nunito', sans-serif; outline: none; }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .modal-footer { display: flex; justify-content: flex-end; gap: 12px; }
+    .btn-cancel { background: transparent; border: none; padding: 12px 20px; font-weight: 700; cursor: pointer; color: var(--gray); font-family: 'Nunito', sans-serif; }
+    .btn-confirm { background: var(--green); color: #fff; border: none; padding: 12px 24px; border-radius: 50px; font-weight: 800; cursor: pointer; font-family: 'Nunito', sans-serif; }
+    .btn-confirm.danger { background: var(--danger); }
+
+    /* TOAST */
+    .toast { position: fixed; bottom: 30px; right: 30px; background: var(--dark); color: #fff; padding: 14px 24px; border-radius: 10px; font-weight: 700; font-size: 0.9rem; z-index: 300; transform: translateY(100px); opacity: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    .toast.open { transform: translateY(0); opacity: 1; }
+    .toast.error { background: var(--danger); }
+  </style>
+</head>
+<body>
+
+  <div class="sidebar">
+    <div class="sidebar-logo"><img src="../assets/img/logo.png" alt="Trokets" /></div>
+    <ul class="sidebar-menu">
+      <li><a class="sidebar-link active" href="#">🪆 Vitrine</a></li>
+    </ul>
+    <div class="sidebar-footer">
+      <button class="btn-logout" onclick="logout()"> Harrison Sair</button>
+    </div>
+  </div>
+
+  <div class="main-content">
+    <div class="header-panel">
+      <h1 class="panel-title">Gerenciar Vitrine</h1>
+      <button class="btn-add" onclick="abrirModalCadastro()">➕ Novo Boneco</button>
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 80px;">Foto</th>
+            <th>Nome</th>
+            <th>Estilo</th>
+            <th>Preço</th>
+            <th style="width: 100px;">Ações</th>
+          </tr>
+        </thead>
+        <tbody id="tabela-bonecos">
+          </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="modal-form">
+    <div class="modal-card">
+      <h2 class="modal-title" id="form-title">Cadastrar Boneco</h2>
+      <form id="boneco-form" onsubmit="event.preventDefault(); salvarBoneco();">
+        <input type="hidden" id="boneco-id" />
+        <div class="modal-fields">
+          <div class="field">
+            <label>Nome do Boneco *</label>
+            <input type="text" id="nome" required />
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>Franquia *</label>
+              <select id="franquia" required>
+                <option value="Funko Pop">Funko Pop</option>
+                <option value="Chibi">Chibi</option>
+                <option value="Outro">Outro</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Preço Base (R$) *</label>
+              <input type="number" id="preco" step="0.01" min="0" required />
+            </div>
+          </div>
+          <div class="field">
+            <label>Imagem do Boneco</label>
+            <input type="file" id="imagem" accept="image/*" />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel" onclick="fecharModal('modal-form')">Cancelar</button>
+          <button type="submit" class="btn-confirm" id="btn-submit">Salvar boneco</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="modal-del">
+    <div class="modal-card" style="max-width: 400px; text-align: center;">
+      <h2 class="modal-title" style="color: var(--danger)">Excluir Registro?</h2>
+      <p style="color: var(--gray); margin-bottom: 24px;">Tem certeza que deseja apagar este boneco da vitrine? Esta ação não pode ser desfeita.</p>
+      <input type="hidden" id="del-id" />
+      <div class="modal-footer" style="justify-content: center;">
+        <button class="btn-cancel" onclick="fecharModal('modal-del')">Voltar</button>
+        <button class="btn-confirm danger" id="btn-del-confirm" onclick="confirmarExclusao()">Sim, excluir</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const API_BASE = 'http://localhost:8121';
+
+    function token() { return localStorage.getItem('trokets_token'); }
+    function headers() { return { 'Authorization': `Bearer ${token()}` }; }
+
+    function verificarAutenticacao() {
+      if (!token()) { logout(); }
+    }
+
+    function logout() {
+      localStorage.clear();
+      window.location.href = 'admin-login.html';
+    }
+
+    // ===== CARREGAR BONECOS =====
+    async function carregarBonecos() {
+      const tbody = document.getElementById('tabela-bonecos');
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--gray)">Carregando...</td></tr>';
+      
+      try {
+        const res = await fetch(`${API_BASE}/api/funkos`);
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        const bonecos = data.content ?? data;
+
+        if (!bonecos.length) {
+          tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--gray)">Nenhum boneco cadastrado.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = bonecos.map(b => `
+          <tr>
+            <td>
+              ${b.imagemUrl
+                ? `<img src='http://localhost:9000/eq21/funkos/a58543d0-b031-4c99-be57-1aafa81d90b0.jpg' class="td-img" alt="${b.nome}"/>`
+                : '<div class="td-img">🪆</div>'}
+            </td>
+            <td style="font-weight:700">${b.nome}</td>
+            <td><span class="badge-estilo">${b.franquia || '-'}</span></td>
+            <td style="font-weight:900; color:var(--green)">
+              R$ ${Number(b.preco).toFixed(2).replace('.', ',')}
+            </td>
+            <td>
+              <div class="actions-btns">
+                <button class="btn-action edit" onclick="abrirModalEdicao(${JSON.stringify(b).replace(/"/g, '&quot;')})">✏️</button>
+                <button class="btn-action del" onclick="abrirModalDeletar('${b.id}')">🗑️</button>
+              </div>
+            </td>
+          </tr>
+        `).join('');
+      } catch (e) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--danger)">Erro ao conectar ao servidor.</td></tr>';
+      }
+    }
+
+    // ===== MODAIS CONTROLE =====
+    function abrirModal(id) { document.getElementById(id).classList.add('open'); }
+    function fecharModal(id) { document.getElementById(id).classList.remove('open'); }
+
+    function abrirModalCadastro() {
+      document.getElementById('boneco-form').reset();
+      document.getElementById('boneco-id').value = '';
+      document.getElementById('form-title').textContent = 'Cadastrar Boneco';
+      document.getElementById('btn-submit').textContent = 'Salvar boneco';
+      abrirModal('modal-form');
+    }
+
+    function abrirModalEdicao(b) {
+      document.getElementById('boneco-id').value = b.id;
+      document.getElementById('nome').value = b.nome;
+      document.getElementById('franquia').value = b.franquia || 'Funko Pop';
+      document.getElementById('preco').value = b.preco || '';
+      document.getElementById('form-title').textContent = 'Editar Boneco';
+      document.getElementById('btn-submit').textContent = 'Atualizar boneco';
+      abrirModal('modal-form');
+    }
+
+    function abrirModalDeletar(id) {
+      document.getElementById('del-id').value = id;
+      abrirModal('modal-del');
+    }
+
+    // ===== SALVAR / EDITAR MULTIPART =====
+    async function salvarBoneco() {
+      const id = document.getElementById('boneco-id').value;
+      const btn = document.getElementById('btn-submit');
+      btn.disabled = true;
+      btn.textContent = 'Enviando...';
+
+      const formData = new FormData();
+      formData.append('nome', document.getElementById('nome').value.trim());
+      formData.append('franquia', document.getElementById('franquia').value);
+      formData.append('preco', document.getElementById('preco').value);
+
+      const imgInput = document.getElementById('imagem').files[0];
+      if (imgInput) formData.append('imagem', imgInput);
+
+      const url = id ? `${API_BASE}/api/funkos/${id}` : `${API_BASE}/api/funkos`;
+      const method = id ? 'PUT' : 'POST';
+
+      try {
+        const res = await fetch(url, {
+          method: method,
+          headers: headers(),
+          body: formData
+        });
+
+        if (res.status === 401 || res.status === 403) { logout(); return; }
+        if (!res.ok) throw new Error('Erro ao salvar.');
+
+        fecharModal('modal-form');
+        mostrarToast(id ? '✅ Boneco atualizado!' : '✅ Boneco adicionado!');
+        await carregarBonecos();
+      } catch (e) {
+        mostrarToast('Erro ao salvar boneco.', true);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = id ? 'Atualizar boneco' : 'Salvar boneco';
+      }
+    }
+
+    // ===== EXCLUIR =====
+    async function confirmarExclusao() {
+      const id  = document.getElementById('del-id').value;
+      const btn = document.getElementById('btn-del-confirm');
+      btn.disabled = true;
+      btn.textContent = 'Excluindo...';
+      try {
+        const res = await fetch(`${API_BASE}/api/funkos/${id}`, {
+          method: 'DELETE',
+          headers: headers()
+        });
+        if (res.status === 401) { logout(); return; }
+        fecharModal('modal-del');
+        mostrarToast('🗑️ Boneco excluído!');
+        await carregarBonecos();
+      } catch (e) {
+        mostrarToast('Erro ao excluir.', true);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Sim, excluir';
+      }
+    }
+
+    // ===== TOAST =====
+    function mostrarToast(msg, erro = false) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = 'toast' + (erro ? ' error' : '');
+      t.classList.add('open');
+      setTimeout(() => t.classList.remove('open'), 3000);
+    }
+
+    // Inicialização
+    verificarAutenticacao();
+    carregarBonecos();
+  </script>
+</body>
+</html>

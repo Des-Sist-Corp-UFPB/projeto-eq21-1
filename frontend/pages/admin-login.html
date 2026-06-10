@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin – Trokets</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;900&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/css/style.css" />
+  <style>
+    :root {
+      --cream:       #DDC595;
+      --cream-light: #F0E0BB;
+      --cream-dark:  #C8AA75;
+      --green:       #4D6E26;
+      --green-dark:  #3A5219;
+      --offwhite:    #FAF5EC;
+      --dark:        #1C1C1C;
+      --gray:        #6B6B6B;
+      --gray-light:  #E8E3DA;
+      --danger:      #C0392B;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: linear-gradient(135deg, var(--green-dark) 0%, var(--green) 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .login-container {
+      background: var(--offwhite);
+      width: 100%;
+      max-width: 420px;
+      padding: 40px 30px;
+      border-radius: 24px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+      text-align: center;
+    }
+    .logo img {
+      height: 60px;
+      margin-bottom: 20px;
+    }
+    .title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem;
+      color: var(--green-dark);
+      margin-bottom: 6px;
+    }
+    .subtitle {
+      font-size: 0.9rem;
+      color: var(--gray);
+      margin-bottom: 30px;
+    }
+    .field {
+      text-align: left;
+      margin-bottom: 20px;
+    }
+    .field label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: 6px;
+    }
+    .field input {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid var(--gray-light);
+      border-radius: 12px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .field input:focus {
+      border-color: var(--cream-dark);
+    }
+    .btn-login {
+      width: 100%;
+      background: var(--green);
+      color: #fff;
+      border: none;
+      padding: 16px;
+      border-radius: 50px;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 900;
+      font-size: 1.05rem;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: background 0.2s;
+    }
+    .btn-login:hover {
+      background: var(--green-dark);
+    }
+    .btn-login:disabled {
+      background: var(--gray);
+      cursor: not-allowed;
+    }
+    .error-box {
+      background: #fde8e8;
+      color: var(--danger);
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="login-container">
+    <div class="logo">
+      <img src="../assets/img/logo.png" alt="Trokets" />
+    </div>
+    <h1 class="title">Painel Administrativo</h1>
+    <p class="subtitle">Acesse para gerenciar a vitrine de bonecos.</p>
+
+    <div class="error-box" id="error-box"></div>
+
+    <form id="login-form" onsubmit="event.preventDefault(); executarLogin();">
+      <div class="field">
+        <label>E-mail *</label>
+        <input type="email" id="email" placeholder="admin@trokets.com" required />
+      </div>
+      <div class="field">
+        <label>Senha *</label>
+        <input type="password" id="senha" placeholder="••••••••" required />
+      </div>
+      <button type="submit" class="btn-login" id="btn-login">Entrar no painel</button>
+    </form>
+  </div>
+
+  <script>
+    const API_BASE = 'http://localhost:8121';
+
+    async function executarLogin() {
+      const email = document.getElementById('email').value.trim();
+      const senha = document.getElementById('senha').value;
+      const btn   = document.getElementById('btn-login');
+      const errBox = document.getElementById('error-box');
+
+      errBox.style.display = 'none';
+      if (!email || !senha) {
+        mostrarErro('Preencha e-mail e senha.');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Entrando...';
+
+      try {
+        const res = await fetch(`${API_BASE}/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, senha })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          mostrarErro(data.erro || 'Credenciais inválidas.');
+          return;
+        }
+
+        if (data.role !== 'ADMIN') {
+          mostrarErro('Acesso restrito a administradores.');
+          return;
+        }
+
+        localStorage.setItem('trokets_token', data.token);
+        localStorage.setItem('trokets_email', data.email);
+        window.location.href = 'admin.html';
+
+      } catch (e) {
+        mostrarErro('Não foi possível conectar ao servidor.');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Entrar no painel';
+      }
+    }
+
+    function mostrarErro(msg) {
+      const box = document.getElementById('error-box');
+      box.textContent = msg;
+      box.style.display = 'block';
+    }
+  </script>
+</body>
+</html>
