@@ -35,6 +35,7 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/ping", "/actuator/health").permitAll()
+                        .requestMatchers("/", "/index.html", "/frontend/**", "/assets/**", "/pages/**").permitAll()
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/funkos", "/api/funkos/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/funkos", "/api/funkos/**").hasRole("ADMIN")
