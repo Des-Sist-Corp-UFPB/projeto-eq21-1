@@ -131,22 +131,18 @@
             <label>Nome do Boneco *</label>
             <input type="text" id="nome" required />
           </div>
-          <div class="field">
-            <label>Descrição</label>
-            <textarea id="descricao" rows="2"></textarea>
-          </div>
           <div class="field-row">
             <div class="field">
-              <label>Estilo *</label>
-              <select id="estilo" required>
+              <label>Franquia *</label>
+              <select id="franquia" required>
                 <option value="Funko Pop">Funko Pop</option>
                 <option value="Chibi">Chibi</option>
                 <option value="Outro">Outro</option>
               </select>
             </div>
             <div class="field">
-              <label>Preço Base (R$)</label>
-              <input type="number" id="preco" step="0.01" />
+              <label>Preço Base (R$) *</label>
+              <input type="number" id="preco" step="0.01" min="0" required />
             </div>
           </div>
           <div class="field">
@@ -177,7 +173,7 @@
   <div class="toast" id="toast"></div>
 
   <script>
-    const API_BASE = 'http://localhost:8080';
+    const API_BASE = 'http://localhost:8121';
 
     function token() { return localStorage.getItem('trokets_token'); }
     function headers() { return { 'Authorization': `Bearer ${token()}` }; }
@@ -197,11 +193,12 @@
       tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--gray)">Carregando...</td></tr>';
       
       try {
-        const res = await fetch(`${API_BASE}/api/bonecos`);
+        const res = await fetch(`${API_BASE}/api/funkos`);
         if (!res.ok) throw new Error();
-        const bonecos = await res.json();
+        const data = await res.json();
+        const bonecos = data.content ?? data;
 
-        if(!bonecos.length) {
+        if (!bonecos.length) {
           tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--gray)">Nenhum boneco cadastrado.</td></tr>';
           return;
         }
@@ -209,14 +206,14 @@
         tbody.innerHTML = bonecos.map(b => `
           <tr>
             <td>
-              ${b.imagemUrl 
-                ? `<img src="${b.imagemUrl}" class="td-img" alt="${b.nome}"/>` 
+              ${b.imagemUrl
+                ? `<img src='http://localhost:9000/eq21/funkos/a58543d0-b031-4c99-be57-1aafa81d90b0.jpg' class="td-img" alt="${b.nome}"/>`
                 : '<div class="td-img">🪆</div>'}
             </td>
             <td style="font-weight:700">${b.nome}</td>
-            <td><span class="badge-estilo">${b.estilo || 'Outro'}</span></td>
+            <td><span class="badge-estilo">${b.franquia || '-'}</span></td>
             <td style="font-weight:900; color:var(--green)">
-              ${b.preco ? `R$ ${Number(b.preco).toFixed(2).replace('.',',')}` : 'A combinar'}
+              R$ ${Number(b.preco).toFixed(2).replace('.', ',')}
             </td>
             <td>
               <div class="actions-btns">
@@ -246,8 +243,7 @@
     function abrirModalEdicao(b) {
       document.getElementById('boneco-id').value = b.id;
       document.getElementById('nome').value = b.nome;
-      document.getElementById('descricao').value = b.descricao || '';
-      document.getElementById('estilo').value = b.estilo || 'Funko Pop';
+      document.getElementById('franquia').value = b.franquia || 'Funko Pop';
       document.getElementById('preco').value = b.preco || '';
       document.getElementById('form-title').textContent = 'Editar Boneco';
       document.getElementById('btn-submit').textContent = 'Atualizar boneco';
@@ -268,16 +264,13 @@
 
       const formData = new FormData();
       formData.append('nome', document.getElementById('nome').value.trim());
-      formData.append('descricao', document.getElementById('descricao').value.trim());
-      formData.append('estilo', document.getElementById('estilo').value);
-      
-      const preco = document.getElementById('preco').value;
-      if (preco) formData.append('preco', preco);
-      
+      formData.append('franquia', document.getElementById('franquia').value);
+      formData.append('preco', document.getElementById('preco').value);
+
       const imgInput = document.getElementById('imagem').files[0];
       if (imgInput) formData.append('imagem', imgInput);
 
-      const url = id ? `${API_BASE}/api/bonecos/${id}` : `${API_BASE}/api/bonecos`;
+      const url = id ? `${API_BASE}/api/funkos/${id}` : `${API_BASE}/api/funkos`;
       const method = id ? 'PUT' : 'POST';
 
       try {
@@ -308,7 +301,7 @@
       btn.disabled = true;
       btn.textContent = 'Excluindo...';
       try {
-        const res = await fetch(`${API_BASE}/api/bonecos/${id}`, {
+        const res = await fetch(`${API_BASE}/api/funkos/${id}`, {
           method: 'DELETE',
           headers: headers()
         });

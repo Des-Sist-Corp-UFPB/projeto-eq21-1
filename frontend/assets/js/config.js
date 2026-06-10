@@ -2,10 +2,10 @@
 
 const CONFIG = {
   // URL base do servidor Back-end Spring Boot
-  API_BASE: "http://localhost:8080",
+  API_BASE: "http://localhost:8121",
   
-  // Número do WhatsApp da Trokets formate com código do país e DDD (Ex: 5583999999999)
-  WHATSAPP_NUMERO: "5583999999999",
+  // Número do WhatsApp da Trokets 
+  WHATSAPP_NUMERO: "5584996980815",
   
   // Mensagem padrão de saudação ao abrir o link
   WHATSAPP_SAUDACAO: "Olá! Gostaria de confirmar o meu pedido de boneco personalizado feito no site."

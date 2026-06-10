@@ -6,9 +6,11 @@ async function carregarVitrine() {
 
   try {
     // Repare que aqui usamos o CONFIG.API_BASE que criamos no passo anterior!
-    const res = await fetch(`${CONFIG.API_BASE}/api/bonecos`);
+    const res = await fetch(`${CONFIG.API_BASE}/api/funkos`);
     if (!res.ok) throw new Error('Sem resposta do servidor');
-    const bonecos = await res.json();
+    const data = await res.json();
+    // A API retorna Page<FunkoResponse> — os itens ficam em data.content
+    const bonecos = Array.isArray(data) ? data : (data.content ?? []);
 
     if (!bonecos.length) {
       grid.innerHTML = `
