@@ -45,11 +45,11 @@ RUN chown mercado:mercado app.jar
 # Trocar para usuário não-root
 USER mercado
 
-EXPOSE 8121
+EXPOSE 8080
 
 # Health check: o Actuator expõe /actuator/health
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD wget -qO- http://localhost:8121/actuator/health || exit 1
+    CMD wget -qO- http://localhost:8080/actuator/health || exit 1
 
 # Opções JVM para produção:
 #   -XX:+UseContainerSupport: respeita limites de memória do container
