@@ -49,7 +49,7 @@ EXPOSE 8121
 
 # Health check: o Actuator expõe /actuator/health
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD wget -qO- http://localhost:8080/actuator/health || exit 1
+    CMD wget -qO- http://localhost:8121/actuator/health || exit 1
 
 # Opções JVM para produção:
 #   -XX:+UseContainerSupport: respeita limites de memória do container

@@ -103,7 +103,7 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS}
     ports:
-      - "127.0.0.1:8121:8080"
+      - "127.0.0.1:8121:8121"
     depends_on:
       postgres:
         condition: service_healthy
