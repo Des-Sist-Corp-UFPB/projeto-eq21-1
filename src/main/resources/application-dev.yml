@@ -2,7 +2,7 @@ spring:
   config:
     import: optional:file:.env[.properties]
   datasource:
-    url: jdbc:postgresql://localhost:5432/eq21
+    url: jdbc:postgresql://${DB_HOST:localhost}:5432/eq21
   jpa:
     show-sql: true
     properties:
