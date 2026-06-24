@@ -35,6 +35,9 @@ services:
   postgres:
     image: postgres:16-alpine
     container_name: funko-postgres-prod
+    env_file:
+      - path: ../.env
+        required: true
     environment:
       POSTGRES_DB: eq21
       POSTGRES_USER: ${DB_USERNAME}
@@ -66,6 +69,9 @@ services:
   minio:
     image: minio/minio:latest
     container_name: funko-minio-prod
+    env_file:
+      - path: ../.env
+        required: true
     environment:
       MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
       MINIO_ROOT_PASSWORD: ${MINIO_SECRET}
@@ -95,6 +101,9 @@ services:
   app:
     image: ${APP_IMAGE}
     container_name: funko-app-prod
+    env_file:
+      - path: ../.env
+        required: true
     environment:
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
