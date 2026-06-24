@@ -97,7 +97,7 @@ export default function Admin() {
             { emoji: '🪆', label: 'Bonecos', to: null },
             { emoji: '🏪', label: 'Ver loja', to: '/', ext: false },
             { emoji: '💬', label: 'WhatsApp', to: `https://wa.me/${CONFIG.WHATSAPP_NUMERO}`, ext: true },
-            { emoji: '📸', label: 'Instagram', to: 'https://instagram.com/trokets', ext: true },
+            { emoji: '📸', label: 'Instagram', to: 'https://instagram.com/trokets_biscuit', ext: true },
           ].map(({ emoji, label, to, ext }) => (
             <li key={label} style={{ marginBottom: 2 }}>
               {ext

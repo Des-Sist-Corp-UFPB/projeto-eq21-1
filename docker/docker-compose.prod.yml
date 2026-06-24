@@ -102,6 +102,8 @@ services:
       MINIO_SECRET: ${MINIO_SECRET}
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS}
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      ADMIN_SENHA: ${ADMIN_SENHA}
     ports:
       - "127.0.0.1:8121:8121"
     depends_on:

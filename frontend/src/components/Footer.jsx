@@ -17,7 +17,7 @@ export default function Footer() {
           </p>
           <div style={{ display: 'flex', gap: 12, marginTop: 20 }}>
             {[
-              { emoji: '📸', href: 'https://instagram.com/trokets', title: 'Instagram' },
+              { emoji: '📸', href: 'https://instagram.com/trokets_biscuit', title: 'Instagram' },
               { emoji: '💬', href: 'https://wa.me/5584996980815', title: 'WhatsApp' },
             ].map(({ emoji, href, title }) => (
               <a key={title} href={href} target="_blank" rel="noreferrer" title={title} style={{
@@ -52,7 +52,7 @@ export default function Footer() {
           <div style={colTitle}>Contato</div>
           <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 10 }}>
             <li><a href="https://wa.me/5584996980815" target="_blank" rel="noreferrer" style={footerLink}>WhatsApp</a></li>
-            <li><a href="https://instagram.com/trokets" target="_blank" rel="noreferrer" style={footerLink}>@trokets</a></li>
+            <li><a href="https://instagram.com/trokets_biscuit" target="_blank" rel="noreferrer" style={footerLink}>@trokets_biscuit</a></li>
           </ul>
           <div style={{ ...colTitle, marginTop: 24 }}>Horário</div>
           <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 6, fontSize: '.88rem' }}>
@@ -69,7 +69,7 @@ export default function Footer() {
         gap: 12, fontSize: '.82rem',
       }}>
         <span>© 2025 Trokets. Todos os direitos reservados.</span>
-        <a href="https://instagram.com/trokets" target="_blank" rel="noreferrer"
+        <a href="https://instagram.com/trokets_biscuit" target="_blank" rel="noreferrer"
           style={{ color: 'var(--cream)', textDecoration: 'none' }}>
           Feito com 🌵 e biscuit
         </a>
