@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, Navigate, Link } from 'react-router-dom'
 import CONFIG from '../config.js'
 
 // ===== TELA DE LOGIN ADMIN =====
@@ -10,10 +10,8 @@ export default function Login() {
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
 
-  // Se já logado, vai direto para o admin
   if (localStorage.getItem('trokets_token')) {
-    navigate('/admin', { replace: true })
-    return null
+    return <Navigate to="/admin" replace />
   }
 
   async function handleLogin(e) {

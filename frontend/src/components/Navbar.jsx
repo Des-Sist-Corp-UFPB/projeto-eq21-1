@@ -42,6 +42,15 @@ export default function Navbar() {
             Fazer Pedido
           </Link>
         </li>
+        <li>
+          <Link to="/login" style={{
+            ...linkStyle,
+            border: '2px solid var(--green)',
+            padding: '7px 18px', borderRadius: 50,
+          }}>
+            Admin
+          </Link>
+        </li>
       </ul>
     </nav>
   )
