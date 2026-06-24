@@ -24,7 +24,7 @@ export default function Navbar() {
           { label: 'Vitrine',   href: '/#vitrine'  },
           { label: 'Preços',    href: '/#precos'   },
           { label: 'Pagamento', href: '/#info'     },
-          { label: 'Instagram', href: 'https://instagram.com/trokets', ext: true },
+          { label: 'Instagram', href: 'https://instagram.com/trokets_biscuit', ext: true },
         ].map(({ label, href, ext }) => (
           <li key={label}>
             {ext
