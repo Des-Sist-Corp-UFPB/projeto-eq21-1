@@ -1,6 +1,6 @@
 // ===== CONFIGURAÇÕES GLOBAIS =====
 const CONFIG = {
-  API_BASE: import.meta.env.VITE_API_BASE ?? 'http://localhost:8121',
+  API_BASE: import.meta.env.VITE_API_BASE ?? '',
 
   // Número do WhatsApp (55 + DDD + número)
   WHATSAPP_NUMERO: '5584996980815',
