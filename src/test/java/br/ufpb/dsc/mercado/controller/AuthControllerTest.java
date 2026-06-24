@@ -1,5 +1,6 @@
 package br.ufpb.dsc.mercado.controller;
 
+import br.ufpb.dsc.mercado.repository.LogAuditoriaRepository;
 import br.ufpb.dsc.mercado.repository.UsuarioRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -17,6 +18,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import software.amazon.awssdk.services.s3.S3Client;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -41,8 +43,12 @@ class AuthControllerTest {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
+    @Autowired
+    private LogAuditoriaRepository logAuditoriaRepository;
+
     @BeforeEach
     void setUp() {
+        logAuditoriaRepository.deleteAll();
         usuarioRepository.deleteAll();
     }
 
@@ -154,5 +160,68 @@ class AuthControllerTest {
                                 """))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.erro").exists());
+    }
+
+    @Test
+    @DisplayName("Auditoria: deve registrar log de REGISTRAR com sucesso")
+    void register_deveGerarLogDeAuditoria() throws Exception {
+        mockMvc.perform(post("/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"email":"auditoria@example.com","senha":"senha123"}
+                                """))
+                .andExpect(status().isCreated());
+
+        assertThat(logAuditoriaRepository.findByOperacao("REGISTRAR"))
+                .isNotEmpty()
+                .anyMatch(l ->
+                        l.getUsuario().equals("auditoria@example.com") &&
+                        l.getStatus().equals("SUCESSO"));
+    }
+
+    @Test
+    @DisplayName("Auditoria: deve registrar FALHA de LOGIN com senha errada")
+    void login_senhaErrada_deveGerarLogDeAuditoriaFalha() throws Exception {
+        mockMvc.perform(post("/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"email":"falha@example.com","senha":"senha123"}
+                                """))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(post("/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"email":"falha@example.com","senha":"senhaErrada"}
+                                """))
+                .andExpect(status().isUnauthorized());
+
+        assertThat(logAuditoriaRepository.findByOperacao("LOGIN"))
+                .isNotEmpty()
+                .anyMatch(l ->
+                        l.getUsuario().equals("falha@example.com") &&
+                        l.getStatus().equals("FALHA"));
+    }
+
+    @Test
+    @DisplayName("Auditoria: deve registrar FALHA de REGISTRAR com email duplicado")
+    void register_emailDuplicado_deveGerarLogDeAuditoriaFalha() throws Exception {
+        String body = """
+                {"email":"dup@example.com","senha":"senha123"}
+                """;
+
+        mockMvc.perform(post("/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(post("/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isConflict());
+
+        long falhas = logAuditoriaRepository.findByOperacao("REGISTRAR").stream()
+                .filter(l -> l.getStatus().equals("FALHA")).count();
+        assertThat(falhas).isGreaterThanOrEqualTo(1);
     }
 }
