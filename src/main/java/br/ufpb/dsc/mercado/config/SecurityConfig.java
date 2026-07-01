@@ -37,6 +37,7 @@ public class SecurityConfig {
                         .requestMatchers("/ping", "/actuator/health").permitAll()
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/funkos", "/api/funkos/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/uploads/imagens").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/funkos", "/api/funkos/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/funkos/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/funkos/**").hasRole("ADMIN")
