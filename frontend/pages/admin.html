@@ -173,7 +173,10 @@
   <div class="toast" id="toast"></div>
 
   <script>
-    const API_BASE = 'https://eq21.dsc.rodrigor.com';
+    {b.imagemUrl
+      ? `<img src="${b.imagemUrl}" class="td-img" alt="${b.nome}" 
+       onerror="this.parentElement.innerHTML='🪆'" />`
+      : '<div class="td-img">🪆</div>'}
 
     function token() { return localStorage.getItem('trokets_token'); }
     function headers() { return { 'Authorization': `Bearer ${token()}` }; }
@@ -276,7 +279,7 @@
       try {
         const res = await fetch(url, {
           method: method,
-          headers: headers(),
+          headers: { 'Authorization': `Bearer ${token()}` },
           body: formData
         });
 
