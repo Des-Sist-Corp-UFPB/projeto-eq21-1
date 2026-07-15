@@ -174,7 +174,10 @@
   <div class="toast" id="toast"></div>
 
   <script>
-    const API_BASE = 'http://localhost:8121';
+    {b.imagemUrl
+      ? `<img src="${b.imagemUrl}" class="td-img" alt="${b.nome}" 
+       onerror="this.parentElement.innerHTML='🪆'" />`
+      : '<div class="td-img">🪆</div>'}
 
     function token() { return localStorage.getItem('trokets_token'); }
     function headers() { return { 'Authorization': `Bearer ${token()}` }; }
@@ -208,7 +211,7 @@
           <tr>
             <td>
               ${b.imagemUrl
-                ? `<img src='http://localhost:9000/eq21/funkos/a58543d0-b031-4c99-be57-1aafa81d90b0.jpg' class="td-img" alt="${b.nome}"/>`
+                ? `<img src="${b.imagemUrl}" class="td-img" alt="${b.nome}"/>`
                 : '<div class="td-img">🪆</div>'}
             </td>
             <td style="font-weight:700">${b.nome}</td>
@@ -277,7 +280,7 @@
       try {
         const res = await fetch(url, {
           method: method,
-          headers: headers(),
+          headers: { 'Authorization': `Bearer ${token()}` },
           body: formData
         });
 

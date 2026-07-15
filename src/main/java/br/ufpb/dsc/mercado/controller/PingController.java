@@ -9,13 +9,11 @@ import java.util.Map;
 
 @RestController
 public class PingController {
-
     @GetMapping("/ping")
-    public ResponseEntity<Map<String, String>> ping() {
-        return ResponseEntity.ok(Map.of(
+    public Map<String,Object> ping() {
+        return Map.of(
                 "status", "ok",
                 "service", "eq21",
-                "timestamp", Instant.now().toString()
-        ));
+                "timestamp", java.time.Instant.now().toString());
     }
 }

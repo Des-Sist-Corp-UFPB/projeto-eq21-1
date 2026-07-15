@@ -24,7 +24,7 @@ export default function Navbar() {
           { label: 'Vitrine',   href: '/#vitrine'  },
           { label: 'Preços',    href: '/#precos'   },
           { label: 'Pagamento', href: '/#info'     },
-          { label: 'Instagram', href: 'https://instagram.com/trokets', ext: true },
+          { label: 'Instagram', href: 'https://instagram.com/trokets_biscuit', ext: true },
         ].map(({ label, href, ext }) => (
           <li key={label}>
             {ext
@@ -40,6 +40,15 @@ export default function Navbar() {
             padding: '9px 22px', borderRadius: 50,
           }}>
             Fazer Pedido
+          </Link>
+        </li>
+        <li>
+          <Link to="/login" style={{
+            ...linkStyle,
+            border: '2px solid var(--green)',
+            padding: '7px 18px', borderRadius: 50,
+          }}>
+            Admin
           </Link>
         </li>
       </ul>

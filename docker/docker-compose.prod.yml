@@ -35,6 +35,9 @@ services:
   postgres:
     image: postgres:16-alpine
     container_name: funko-postgres-prod
+    env_file:
+      - path: ../.env
+        required: true
     environment:
       POSTGRES_DB: eq21
       POSTGRES_USER: ${DB_USERNAME}
@@ -66,6 +69,9 @@ services:
   minio:
     image: minio/minio:latest
     container_name: funko-minio-prod
+    env_file:
+      - path: ../.env
+        required: true
     environment:
       MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
       MINIO_ROOT_PASSWORD: ${MINIO_SECRET}
@@ -95,6 +101,9 @@ services:
   app:
     image: ${APP_IMAGE}
     container_name: funko-app-prod
+    env_file:
+      - path: ../.env
+        required: true
     environment:
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
@@ -102,6 +111,8 @@ services:
       MINIO_SECRET: ${MINIO_SECRET}
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS}
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      ADMIN_SENHA: ${ADMIN_SENHA}
     ports:
       - "127.0.0.1:8121:8121"
     depends_on:
@@ -112,7 +123,7 @@ services:
     # Healthcheck via Spring Actuator — o Docker considera o container saudável
     # somente quando a aplicação estiver pronta para receber requisições.
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health || exit 1"]
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8121/actuator/health || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3

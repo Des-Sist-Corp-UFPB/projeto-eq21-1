@@ -1,7 +1,13 @@
 package br.ufpb.dsc.mercado.controller;
 
 import br.ufpb.dsc.mercado.domain.Funko;
+import br.ufpb.dsc.mercado.domain.Role;
+import br.ufpb.dsc.mercado.domain.Usuario;
 import br.ufpb.dsc.mercado.repository.FunkoRepository;
+import br.ufpb.dsc.mercado.repository.LogAuditoriaRepository;
+import br.ufpb.dsc.mercado.repository.UsuarioRepository;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -10,7 +16,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -21,6 +29,7 @@ import software.amazon.awssdk.services.s3.S3Client;
 
 import java.math.BigDecimal;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -45,11 +54,25 @@ class FunkoControllerTest {
     @Autowired
     private FunkoRepository funkoRepository;
 
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private LogAuditoriaRepository logAuditoriaRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
     private Funko funkoCadastrado;
 
     @BeforeEach
     void setUp() {
+        logAuditoriaRepository.deleteAll();
         funkoRepository.deleteAll();
+        usuarioRepository.deleteAll();
         funkoCadastrado = funkoRepository.save(
                 new Funko("Batman", "DC Comics", new BigDecimal("89.90")));
     }
@@ -151,5 +174,101 @@ class FunkoControllerTest {
                         .param("franquia", "Marvel")
                         .param("preco", "99.90"))
                 .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    @DisplayName("PUT /api/funkos/{id}: deve atualizar funko existente")
+    void atualizar_funkoExistente_deveRetornar200() throws Exception {
+        mockMvc.perform(multipart(HttpMethod.PUT, "/api/funkos/{id}", funkoCadastrado.getId())
+                        .param("nome", "Batman Deluxe")
+                        .param("franquia", "DC Comics")
+                        .param("preco", "129.90"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.nome").value("Batman Deluxe"))
+                .andExpect(jsonPath("$.preco").value(129.90));
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    @DisplayName("PUT /api/funkos/{id}: id inexistente deve retornar 404")
+    void atualizar_funkoInexistente_deveRetornar404() throws Exception {
+        mockMvc.perform(multipart(HttpMethod.PUT, "/api/funkos/{id}", 9999L)
+                        .param("nome", "Batman")
+                        .param("franquia", "DC")
+                        .param("preco", "89.90"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser(roles = "CUSTOMER")
+    @DisplayName("DELETE /api/funkos/{id}: CUSTOMER não deve ter acesso")
+    void excluir_comRoleCustomer_deveRetornar403() throws Exception {
+        mockMvc.perform(delete("/api/funkos/{id}", funkoCadastrado.getId()))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("Fluxo JWT: deve criar funko autenticado com token real")
+    void criarFunko_comJwtValido_deveRetornar201() throws Exception {
+        usuarioRepository.save(new Usuario(
+                "admin@test.com", passwordEncoder.encode("admin123"), Role.ADMIN));
+
+        String body = mockMvc.perform(post("/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"email":"admin@test.com","senha":"admin123"}
+                                """))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        String token = objectMapper.readTree(body).get("token").asText();
+
+        mockMvc.perform(multipart("/api/funkos")
+                        .param("nome", "Iron Man")
+                        .param("franquia", "Marvel")
+                        .param("preco", "119.90")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.nome").value("Iron Man"));
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    @DisplayName("Auditoria: deve registrar log ao criar funko")
+    void criar_deveGerarLogDeAuditoria() throws Exception {
+        mockMvc.perform(multipart("/api/funkos")
+                        .param("nome", "Hulk")
+                        .param("franquia", "Marvel")
+                        .param("preco", "79.90"))
+                .andExpect(status().isCreated());
+
+        assertThat(logAuditoriaRepository.findByOperacao("CRIAR"))
+                .isNotEmpty()
+                .anyMatch(l -> l.getRecurso().equals("FUNKO") && l.getStatus().equals("SUCESSO"));
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    @DisplayName("Auditoria: deve registrar log ao excluir funko")
+    void excluir_deveGerarLogDeAuditoria() throws Exception {
+        mockMvc.perform(delete("/api/funkos/{id}", funkoCadastrado.getId()))
+                .andExpect(status().isNoContent());
+
+        assertThat(logAuditoriaRepository.findByOperacao("EXCLUIR"))
+                .isNotEmpty()
+                .anyMatch(l -> l.getStatus().equals("SUCESSO"));
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    @DisplayName("Auditoria: deve registrar FALHA ao tentar excluir funko inexistente")
+    void excluir_funkoInexistente_deveGerarLogDeAuditoriaFalha() throws Exception {
+        mockMvc.perform(delete("/api/funkos/{id}", 9999L))
+                .andExpect(status().isNotFound());
+
+        assertThat(logAuditoriaRepository.findByOperacao("EXCLUIR"))
+                .isNotEmpty()
+                .anyMatch(l -> l.getStatus().equals("FALHA"));
     }
 }
