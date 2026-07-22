@@ -18,6 +18,13 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
+  ai:
+    openai:
+      base-url: ${openai.base-url}
+      api-key: ${openai.api-key}
+      chat:
+        options:
+          model: ${openai.model}
 
 aws:
   s3:
@@ -44,3 +51,8 @@ management:
   endpoint:
     health:
       show-details: when-authorized
+
+openai:
+  base-url: ${OPENAI_BASE_URL}
+  api-key: ${OPENAI_API_KEY}
+  model: ${OPENAI_MODEL}

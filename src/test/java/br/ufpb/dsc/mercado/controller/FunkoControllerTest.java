@@ -6,6 +6,7 @@ import br.ufpb.dsc.mercado.domain.Usuario;
 import br.ufpb.dsc.mercado.repository.FunkoRepository;
 import br.ufpb.dsc.mercado.repository.LogAuditoriaRepository;
 import br.ufpb.dsc.mercado.repository.UsuarioRepository;
+import br.ufpb.dsc.mercado.service.FunkoAnaliseService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,6 +48,9 @@ class FunkoControllerTest {
 
     @MockitoBean
     private S3Client s3Client;
+
+    @MockitoBean
+    private FunkoAnaliseService funkoAnaliseService;
 
     @Autowired
     private MockMvc mockMvc;

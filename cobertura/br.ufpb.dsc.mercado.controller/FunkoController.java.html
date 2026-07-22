@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FunkoController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">eq21</a> &gt; <a href="index.source.html" class="el_package">br.ufpb.dsc.mercado.controller</a> &gt; <span class="el_source">FunkoController.java</span></div><h1>FunkoController.java</h1><pre class="source lang-java linenums">package br.ufpb.dsc.mercado.controller;
+
+import br.ufpb.dsc.mercado.dto.FunkoAnaliseResponse;
+import br.ufpb.dsc.mercado.dto.FunkoRequest;
+import br.ufpb.dsc.mercado.dto.FunkoResponse;
+import br.ufpb.dsc.mercado.service.FunkoAnaliseService;
+import br.ufpb.dsc.mercado.service.FunkoService;
+import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.net.URI;
+
+@RestController
+@RequestMapping(&quot;/api/funkos&quot;)
+public class FunkoController {
+
+    private final FunkoService service;
+    private final FunkoAnaliseService analiseService;
+
+<span class="fc" id="L26">    public FunkoController(FunkoService service, FunkoAnaliseService analiseService) {</span>
+<span class="fc" id="L27">        this.service = service;</span>
+<span class="fc" id="L28">        this.analiseService = analiseService;</span>
+<span class="fc" id="L29">    }</span>
+
+    @GetMapping
+    public Page&lt;FunkoResponse&gt; listar(
+            @RequestParam(required = false) String busca,
+            @PageableDefault(size = 20) Pageable pageable) {
+
+<span class="pc bpc" id="L36" title="1 of 4 branches missed.">        if (busca != null &amp;&amp; !busca.isBlank()) {</span>
+<span class="fc" id="L37">            return service.buscar(busca, pageable).map(FunkoResponse::from);</span>
+        }
+<span class="fc" id="L39">        return service.listar(pageable).map(FunkoResponse::from);</span>
+    }
+
+    @GetMapping(&quot;/{id}&quot;)
+    public FunkoResponse buscarPorId(@PathVariable Long id) {
+<span class="fc" id="L44">        return FunkoResponse.from(service.buscarPorId(id));</span>
+    }
+
+    @PostMapping(consumes = &quot;multipart/form-data&quot;)
+    public ResponseEntity&lt;FunkoResponse&gt; criar(
+            @Valid @ModelAttribute FunkoRequest request,
+            @RequestPart(value = &quot;imagem&quot;, required = false) MultipartFile imagem)
+            throws IOException {
+
+<span class="fc" id="L53">        FunkoResponse response = FunkoResponse.from(service.criar(request, imagem));</span>
+<span class="fc" id="L54">        return ResponseEntity</span>
+<span class="fc" id="L55">                .created(URI.create(&quot;/api/funkos/&quot; + response.id()))</span>
+<span class="fc" id="L56">                .body(response);</span>
+    }
+
+    @PutMapping(value = &quot;/{id}&quot;, consumes = &quot;multipart/form-data&quot;)
+    public FunkoResponse atualizar(
+            @PathVariable Long id,
+            @Valid @ModelAttribute FunkoRequest request,
+            @RequestPart(value = &quot;imagem&quot;, required = false) MultipartFile imagem)
+            throws IOException {
+
+<span class="fc" id="L66">        return FunkoResponse.from(service.atualizar(id, request, imagem));</span>
+    }
+
+    @DeleteMapping(&quot;/{id}&quot;)
+    public ResponseEntity&lt;Void&gt; excluir(@PathVariable Long id) {
+<span class="fc" id="L71">        service.excluir(id);</span>
+<span class="fc" id="L72">        return ResponseEntity.noContent().build();</span>
+    }
+
+    @PostMapping(value = &quot;/analyze-image&quot;, consumes = &quot;multipart/form-data&quot;)
+    public ResponseEntity&lt;FunkoAnaliseResponse&gt; analisarImagem(
+            @RequestPart(&quot;imagem&quot;) MultipartFile imagem) throws IOException {
+<span class="fc" id="L78">        return ResponseEntity.ok(analiseService.analisarImagem(imagem));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

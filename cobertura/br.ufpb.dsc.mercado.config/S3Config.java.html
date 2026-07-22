@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>S3Config.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">eq21</a> &gt; <a href="index.source.html" class="el_package">br.ufpb.dsc.mercado.config</a> &gt; <span class="el_source">S3Config.java</span></div><h1>S3Config.java</h1><pre class="source lang-java linenums">package br.ufpb.dsc.mercado.config;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.S3Configuration;
+
+import java.net.URI;
+
+@Configuration
+<span class="nc" id="L15">public class S3Config {</span>
+
+    @Value(&quot;${aws.s3.endpoint}&quot;)
+    private String endpoint;
+
+    @Value(&quot;${aws.s3.region}&quot;)
+    private String region;
+
+    @Value(&quot;${aws.s3.access-key}&quot;)
+    private String accessKey;
+
+    @Value(&quot;${aws.s3.secret-key}&quot;)
+    private String secretKey;
+
+    @Bean
+    public S3Client s3Client() {
+<span class="nc" id="L31">        return S3Client.builder()</span>
+<span class="nc" id="L32">                .endpointOverride(URI.create(endpoint))</span>
+<span class="nc" id="L33">                .region(Region.of(region))</span>
+<span class="nc" id="L34">                .credentialsProvider(StaticCredentialsProvider.create(</span>
+<span class="nc" id="L35">                        AwsBasicCredentials.create(accessKey, secretKey)))</span>
+<span class="nc" id="L36">                .serviceConfiguration(S3Configuration.builder()</span>
+<span class="nc" id="L37">                        .pathStyleAccessEnabled(true)</span>
+<span class="nc" id="L38">                        .build())</span>
+<span class="nc" id="L39">                .build();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

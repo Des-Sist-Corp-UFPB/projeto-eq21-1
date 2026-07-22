@@ -3,10 +3,11 @@
 ## Visão Geral
 
 ```
-Browser
+Browser (React SPA)
   │
+  │  Requisições REST (JSON) com JWT no header
   ▼
-Controller (Spring MVC)
+Controller (Spring MVC — @RestController)
   │  Recebe requests HTTP, valida DTOs, delega ao Service
   ▼
 Service (@Transactional)
@@ -18,32 +19,34 @@ Repository (Spring Data JPA)
 PostgreSQL
 ```
 
-## Padrão HTMX: Server-Side Rendering Reativo
+## Padrão React SPA + REST API
 
-Em vez de uma SPA (React/Vue), usamos **HTMX**: o servidor retorna fragmentos HTML que o HTMX injeta na página sem reload completo.
+O frontend é uma **Single Page Application** em React (Vite) que consome a API REST do backend.
+A comunicação é feita exclusivamente via JSON, com autenticação JWT no header `Authorization`.
 
 ```
-Browser                         Servidor
+Browser (React)                 Backend (Spring Boot)
   │                               │
-  │  GET /produtos/novo           │
+  │  POST /auth/login             │
   │──────────────────────────────►│
-  │                               │  Retorna apenas o fragmento HTML do form
-  │◄──────────────────────────────│  (não a página inteira)
+  │◄──────────────────────────────│  { token, email, role }
   │                               │
-  │  HTMX injeta o fragment       │
-  │  no elemento alvo (#modal)    │
+  │  GET /api/funkos              │
+  │  Authorization: Bearer <jwt>  │
+  │──────────────────────────────►│
+  │◄──────────────────────────────│  Page<FunkoResponse>
 ```
 
-**Vantagens para este projeto**:
-- Sem JavaScript customizado
-- Templates no servidor (Thymeleaf) com acesso direto ao contexto Spring
-- Fácil de entender e depurar
+**Vantagens desta abordagem**:
+- Separação clara entre frontend e backend
+- Frontend independente, facilmente hospedável em CDN
+- JWT stateless: sem sessão no servidor
 
 ## Flyway: Gerenciamento de Schema
 
 ```
 V1__criar_tabela_produto.sql  ← aplicado na 1ª inicialização
-V2__adicionar_campo_xxx.sql   ← aplicado quando adicionado (NÃO editar V1!)
+V2__criar_tabela_funko.sql    ← aplicado na sequência
 ```
 
 **Regra de ouro**: Nunca edite uma migration já aplicada. Crie sempre uma nova.
@@ -51,16 +54,17 @@ V2__adicionar_campo_xxx.sql   ← aplicado quando adicionado (NÃO editar V1!)
 ## Camadas
 
 ### Controller
+- Anotado com `@RestController`
 - Recebe requisição HTTP
 - Valida DTO com `@Valid`
 - Chama Service
-- Retorna template Thymeleaf (página completa ou fragment)
+- Retorna JSON (ResponseEntity ou objeto serializado)
 - NÃO contém lógica de negócio
 
 ### Service
 - Anotado com `@Service` e `@Transactional`
 - Contém toda a lógica de negócio
-- Lança exceções de domínio (`ProdutoNaoEncontradoException`)
+- Lança exceções de domínio (`FunkoNaoEncontradoException`)
 - Usa Repository para persistência
 
 ### Repository
@@ -71,4 +75,16 @@ V2__adicionar_campo_xxx.sql   ← aplicado quando adicionado (NÃO editar V1!)
 ### Domain (Entidade)
 - Classe JPA mapeada para tabela do banco
 - NÃO deve conter lógica de negócio complexa
-- `@PrePersist`/`@PreUpdate` para auditorias automáticas
+- `@PrePersist`/`@PreUpdate` para timestamps automáticos
+
+## Integrações Externas
+
+| Integração | Finalidade | Configuração |
+|-----------|-----------|-------------|
+| MinIO / S3 | Armazenamento de imagens dos Funkos | `aws.s3.*` em application.yml |
+| LLM via LiteLLM | Análise de imagem para pré-preencher cadastro | `openai.*` em application.yml |
+
+## Auditoria (AOP)
+
+Operações críticas em `FunkoService` e `AuthService` são interceptadas por `AuditoriaAspect`
+e persistidas em `log_auditoria` com usuário, operação, status e timestamp.
