@@ -231,9 +231,37 @@ function ModalForm({ boneco, onSalvar, onFechar }) {
     imagem: null, // File novo selecionado (se houver)
   })
   // Preview: mostra a imagem já cadastrada até o usuário escolher uma nova
-  const [preview, setPreview] = useState(boneco?.imagemUrl || '')
+  const [preview, setPreview]     = useState(boneco?.imagemUrl || '')
+  const [analisando, setAnalisando] = useState(false)
+  const [erroAnalise, setErroAnalise] = useState('')
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
+
+  const analisarImagem = async (file) => {
+    setAnalisando(true)
+    setErroAnalise('')
+    try {
+      const data = new FormData()
+      data.append('imagem', file)
+      const res = await fetch(`${CONFIG.API_BASE}/api/funkos/analyze-image`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${localStorage.getItem('trokets_token')}` },
+        body: data,
+      })
+      if (!res.ok) throw new Error('Falha na análise')
+      const analise = await res.json()
+      setForm(f => ({
+        ...f,
+        nome:    analise.nome    || f.nome,
+        franquia: analise.franquia || f.franquia,
+        preco:   analise.preco != null ? analise.preco : f.preco,
+      }))
+    } catch {
+      setErroAnalise('Não foi possível analisar a imagem. Preencha os campos manualmente.')
+    } finally {
+      setAnalisando(false)
+    }
+  }
 
   function selecionarFoto(file) {
     if (!file) return
@@ -241,6 +269,7 @@ function ModalForm({ boneco, onSalvar, onFechar }) {
     const reader = new FileReader()
     reader.onload = e => setPreview(e.target.result)
     reader.readAsDataURL(file)
+    analisarImagem(file)
   }
 
   return (
@@ -253,23 +282,7 @@ function ModalForm({ boneco, onSalvar, onFechar }) {
           {boneco ? `Editando: ${boneco.nome}` : 'Preencha os dados para adicionar à vitrine.'}
         </div>
 
-        <Campo label="Nome *"      value={form.nome}      onChange={v => set('nome', v)}      placeholder="Ex: Naruto Uzumaki" />
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 18 }}>
-          <div>
-            <label style={labelStyle}>Franquia *</label>
-            <select value={form.franquia} onChange={e => set('franquia', e.target.value)} style={inputStyle}>
-              <option>Funko Pop</option>
-              <option>Chibi</option>
-              <option>Outro</option>
-            </select>
-          </div>
-          <div>
-            <label style={labelStyle}>Preço (R$) *</label>
-            <input type="number" value={form.preco} onChange={e => set('preco', e.target.value)} placeholder="35.00" style={inputStyle} />
-          </div>
-        </div>
-
-        {/* Upload de foto — Multipart Form Data */}
+        {/* Upload de foto — análise automática por IA */}
         <div style={{ marginBottom: 18 }}>
           <label style={labelStyle}>Foto do boneco</label>
           <label style={{
@@ -288,15 +301,48 @@ function ModalForm({ boneco, onSalvar, onFechar }) {
             }}>
               {preview ? <img src={preview} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : '🪆'}
             </div>
-            <div style={{ fontSize: '.85rem', fontWeight: 700, color: 'var(--green-dark)' }}>
-              {form.imagem ? form.imagem.name : preview ? 'Trocar foto' : 'Clique para selecionar uma foto'}
+            <div>
+              <div style={{ fontSize: '.85rem', fontWeight: 700, color: 'var(--green-dark)' }}>
+                {form.imagem ? form.imagem.name : preview ? 'Trocar foto' : 'Clique para selecionar uma foto'}
+              </div>
+              {!analisando && !erroAnalise && form.imagem && (
+                <div style={{ fontSize: '.75rem', color: 'var(--green)', marginTop: 3 }}>
+                  Campos preenchidos automaticamente pela IA
+                </div>
+              )}
             </div>
           </label>
+
+          {analisando && (
+            <div style={{ fontSize: '.82rem', color: 'var(--gray)', marginTop: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ display: 'inline-block', width: 12, height: 12, border: '2px solid var(--green)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
+              Analisando imagem com IA...
+            </div>
+          )}
+          {erroAnalise && (
+            <div style={{ fontSize: '.8rem', color: 'var(--danger)', marginTop: 6 }}>{erroAnalise}</div>
+          )}
+        </div>
+
+        <Campo label="Nome *"      value={form.nome}      onChange={v => set('nome', v)}      placeholder="Ex: Naruto Uzumaki" />
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 18 }}>
+          <div>
+            <label style={labelStyle}>Franquia *</label>
+            <select value={form.franquia} onChange={e => set('franquia', e.target.value)} style={inputStyle}>
+              <option>Funko Pop</option>
+              <option>Chibi</option>
+              <option>Outro</option>
+            </select>
+          </div>
+          <div>
+            <label style={labelStyle}>Preco (R$) *</label>
+            <input type="number" value={form.preco} onChange={e => set('preco', e.target.value)} placeholder="35.00" style={inputStyle} />
+          </div>
         </div>
 
         <div style={{ display: 'flex', gap: 10, marginTop: 24 }}>
           <button onClick={onFechar} style={btnCancelar}>Cancelar</button>
-          <button onClick={() => onSalvar(form)} style={{ ...btnConfirmar, flex: 1 }}>
+          <button onClick={() => onSalvar(form)} disabled={analisando} style={{ ...btnConfirmar, flex: 1, opacity: analisando ? 0.6 : 1 }}>
             {boneco ? 'Atualizar boneco' : 'Salvar boneco'}
           </button>
         </div>

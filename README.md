@@ -11,11 +11,12 @@ Projeto base (boilerplate) para a disciplina **Desenvolvimento de Sistemas Corpo
 | Camada | Tecnologia |
 |--------|-----------|
 | Backend | Java 21 + Spring Boot 3.4.5 |
-| Templates | Thymeleaf + HTMX 2.0 |
-| Frontend | Bootstrap 5.3 |
+| Frontend | React 18 + Vite 5 (SPA) |
+| IA / Visão | Spring AI 1.0.0 (OpenAI-compatible) |
+| Object Storage | MinIO (compatível com AWS S3) |
 | Banco | PostgreSQL 16 |
 | Migrações | Flyway 11 |
-| Segurança | Spring Security 6 |
+| Segurança | Spring Security 6 + JWT (JJWT 0.12.6) |
 | Build | Maven 3.9 |
 | CI/CD | GitHub Actions |
 
@@ -135,10 +136,10 @@ mvn spring-boot:run
 
 | O que | Endereço |
 |-------|----------|
-| Aplicação | http://localhost:8080 |
-| Login | usuário: `admin` / senha: `admin123` |
+| Aplicação | http://localhost:8121 |
+| Login | usuário: `admin@test.com` / senha: `admin123` |
 | Adminer (banco) | http://localhost:8888 |
-| Health check | http://localhost:8080/actuator/health |
+| Health check | http://localhost:8121/actuator/health |
 
 ---
 
@@ -155,14 +156,14 @@ docker compose -f docker/docker-compose.dev.yml down
 
 ## Solução de Problemas Comuns
 
-### "Port 8080 already in use"
-Outra aplicação está usando a porta 8080. Para liberar:
+### "Port 8121 already in use"
+Outra aplicação está usando a porta 8121. Para liberar:
 ```bash
 # macOS / Linux
-lsof -ti:8080 | xargs kill
+lsof -ti:8121 | xargs kill
 
 # Windows (PowerShell)
-netstat -ano | findstr :8080
+netstat -ano | findstr :8121
 # Anote o PID da última coluna e execute:
 taskkill /PID <número-do-pid> /F
 ```
@@ -194,15 +195,109 @@ docker compose -f docker/docker-compose.dev.yml up postgres
 
 ---
 
-## Testes
+## Log de Auditoria
+
+O sistema registra automaticamente as ações de escrita por meio de um aspecto AOP, sem necessidade de código nos controllers ou services de domínio.
+
+### O que é auditado
+
+| Ação | Operação registrada |
+|------|-------------------|
+| Criação de funko | `CRIAR` |
+| Atualização de funko | `ATUALIZAR` |
+| Exclusão de funko | `EXCLUIR` |
+| Registro de usuário | `REGISTRAR` |
+| Login de usuário | `LOGIN` |
+
+### Onde fica armazenado
+
+Tabela `log_auditoria` no PostgreSQL, com os campos:
+
+| Campo | Tipo | Descrição |
+|-------|------|-----------|
+| `id` | BIGINT | Chave primária |
+| `recurso` | VARCHAR(50) | Entidade afetada (`FUNKO`, `USUARIO`) |
+| `recurso_id` | VARCHAR(50) | ID do registro afetado |
+| `operacao` | VARCHAR(50) | Nome da operação (`CRIAR`, `EXCLUIR`, etc.) |
+| `usuario` | VARCHAR(255) | E-mail do usuário autenticado |
+| `detalhe` | VARCHAR(500) | Informações adicionais (ex.: `nome=Batman`) |
+| `status` | VARCHAR(10) | `SUCESSO` ou `FALHA` |
+| `mensagem_erro` | VARCHAR(500) | Mensagem de erro (quando `status=FALHA`) |
+| `ocorrido_em` | TIMESTAMP | Data/hora da ocorrência |
+
+### Como foi implementado
+
+Utilizando **Spring AOP** com `@Around` advice que intercepta métodos dos services antes e depois da execução. Em caso de exceção, o status é registrado como `FALHA` e a exceção é re-lançada. A persistência usa `Propagation.REQUIRES_NEW` para garantir que o log seja salvo mesmo se a transação principal sofrer rollback.
+
+### Classes participantes
+
+- `src/main/java/br/ufpb/dsc/mercado/config/AuditoriaAspect.java` — aspecto AOP que intercepta `FunkoService` e `AuthService`
+- `src/main/java/br/ufpb/dsc/mercado/service/AuditoriaService.java` — persiste os logs com `REQUIRES_NEW`
+- `src/main/java/br/ufpb/dsc/mercado/domain/LogAuditoria.java` — entidade JPA mapeada para `log_auditoria`
+- `src/main/java/br/ufpb/dsc/mercado/repository/LogAuditoriaRepository.java` — repositório Spring Data JPA
+
+---
+
+## Integração com Serviço Externo
+
+O sistema integra dois serviços externos além do banco de dados:
+
+### 1. MinIO / AWS S3 — Object Storage de imagens
+
+**Para que é usado:** armazenamento de imagens dos Funko Pops carregadas pelos administradores. Cada imagem é enviada ao bucket S3-compatível e a URL pública é salva no banco.
+
+**Quais classes participam:**
+- `src/main/java/br/ufpb/dsc/mercado/config/S3Config.java` — cria o bean `S3Client` com endpoint, região e credenciais configuráveis
+- `src/main/java/br/ufpb/dsc/mercado/config/BucketInitializer.java` — cria o bucket na inicialização se ainda não existir e aplica política de leitura pública
+- `src/main/java/br/ufpb/dsc/mercado/service/UploadService.java` — realiza upload de arquivos via `S3Client.putObject()`
+- `src/main/java/br/ufpb/dsc/mercado/controller/UploadController.java` — endpoint `POST /api/uploads/imagens`
+
+**Variáveis de ambiente:**
+```
+AWS_S3_ENDPOINT=<URL do MinIO, ex.: http://minio:9000>
+AWS_S3_PUBLIC_ENDPOINT=<URL pública, ex.: http://localhost:9000>
+AWS_S3_REGION=us-east-1
+AWS_S3_BUCKET=<nome do bucket>
+AWS_S3_ACCESS_KEY=<chave de acesso>
+AWS_S3_SECRET_KEY=<chave secreta>
+```
+
+---
+
+### 2. LiteLLM / OpenAI-compatible — Análise de imagens com IA
+
+**Para que é usado:** análise automática de imagens de Funko Pops. O usuário seleciona uma foto do produto e o sistema chama um modelo de visão (gpt-4o via proxy LiteLLM) para identificar nome do personagem, franquia e preço sugerido, pré-preenchendo o formulário de cadastro.
+
+**Quais classes participam:**
+- `src/main/java/br/ufpb/dsc/mercado/service/FunkoAnaliseService.java` — envia a imagem ao modelo via `ChatClient` (Spring AI) e parseia o JSON retornado
+- `src/main/java/br/ufpb/dsc/mercado/dto/FunkoAnaliseResponse.java` — record de resposta com campos `nome`, `franquia` e `preco`
+- `src/main/java/br/ufpb/dsc/mercado/controller/FunkoController.java` — endpoint `POST /api/funkos/analyze-image`
+
+**Variáveis de ambiente:**
+```
+OPENAI_BASE_URL=<URL base do proxy LiteLLM, ex.: https://llm.rodrigor.com/v1>
+OPENAI_API_KEY=<chave de API>
+OPENAI_MODEL=gpt-4o
+```
+
+---
+
+## Testes e Cobertura
+
+**Cobertura de testes: 93% de instruções** (115 de 1.727 instruções não cobertas).
+
+Relatório completo disponível em: [`cobertura/index.html`](cobertura/index.html)
 
 ```bash
 # Rodar todos os testes (requer Docker em execução — usa Testcontainers)
 mvn test
 
 # Rodar com relatório de cobertura (JaCoCo)
-mvn verify
+mvn clean test jacoco:report
 # Relatório: abra o arquivo target/site/jacoco/index.html no browser
+
+# Regenerar a pasta cobertura/
+cp -r target/site/jacoco cobertura/
 ```
 
 ---

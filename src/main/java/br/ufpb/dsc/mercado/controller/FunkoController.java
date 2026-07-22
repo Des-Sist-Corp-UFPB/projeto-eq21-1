@@ -1,7 +1,9 @@
 package br.ufpb.dsc.mercado.controller;
 
+import br.ufpb.dsc.mercado.dto.FunkoAnaliseResponse;
 import br.ufpb.dsc.mercado.dto.FunkoRequest;
 import br.ufpb.dsc.mercado.dto.FunkoResponse;
+import br.ufpb.dsc.mercado.service.FunkoAnaliseService;
 import br.ufpb.dsc.mercado.service.FunkoService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -19,9 +21,11 @@ import java.net.URI;
 public class FunkoController {
 
     private final FunkoService service;
+    private final FunkoAnaliseService analiseService;
 
-    public FunkoController(FunkoService service) {
+    public FunkoController(FunkoService service, FunkoAnaliseService analiseService) {
         this.service = service;
+        this.analiseService = analiseService;
     }
 
     @GetMapping
@@ -66,5 +70,11 @@ public class FunkoController {
     public ResponseEntity<Void> excluir(@PathVariable Long id) {
         service.excluir(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping(value = "/analyze-image", consumes = "multipart/form-data")
+    public ResponseEntity<FunkoAnaliseResponse> analisarImagem(
+            @RequestPart("imagem") MultipartFile imagem) throws IOException {
+        return ResponseEntity.ok(analiseService.analisarImagem(imagem));
     }
 }

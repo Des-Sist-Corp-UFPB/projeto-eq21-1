@@ -39,7 +39,7 @@ services:
     volumes:
       - postgres-dev-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d eq21"]
+      test: ["CMD-SHELL", "pg_isready -U eq21 -d eq21"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -88,7 +88,7 @@ services:
         required: true
     environment:
       SPRING_PROFILES_ACTIVE: dev
-      SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/eq21
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/eq21
       DB_USERNAME: eq21
       DB_PASSWORD: x8GiTTdz8a26UigqHZHg
       MINIO_ACCESS_KEY: eq21

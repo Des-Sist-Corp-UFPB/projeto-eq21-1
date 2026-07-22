@@ -1,11 +1,11 @@
 # Memória do Projeto — Mercado DSC/UFPB
 
 ## Identidade do Projeto
-- **Nome**: Sistema Mercado — Projeto Base DSC
+- **Nome**: Trokets Biscuit — Funko Pop e-commerce
 - **Disciplina**: Desenvolvimento de Sistemas Corporativos
 - **Professor**: Rodrigo Rebouças
 - **Instituição**: Universidade Federal da Paraíba — Campus IV
-- **Propósito**: Boilerplate educacional para alunos iniciarem seus projetos
+- **Equipe**: Equipe 21
 
 ## Stack Técnica
 | Camada | Tecnologia | Versão |
@@ -13,11 +13,13 @@
 | Linguagem | Java | 21 |
 | Framework | Spring Boot | 3.4.5 |
 | Build | Maven | 3.9+ |
-| Templates | Thymeleaf + HTMX | 3.x + 2.0.4 |
-| Frontend | Bootstrap | 5.3.3 |
+| Frontend | React + Vite | 18.3.1 + 5.4.1 |
+| Estilos | Bootstrap | 5.3.3 |
 | Banco | PostgreSQL | 16 |
 | Migrations | Flyway | 11.x |
-| Segurança | Spring Security | 6.x |
+| Segurança | Spring Security + JWT | 6.x |
+| Armazenamento | MinIO / AWS S3 | SDK v2 |
+| IA (visão) | Spring AI + LiteLLM | 1.0.0 |
 | Testes | JUnit 5 + Testcontainers | - |
 
 ## Estrutura de Pacotes
@@ -88,14 +90,14 @@ docker compose -f docker/docker-compose.prod.yml up -d
 
 ## Decisões Arquiteturais
 
-### Por que HTMX em vez de React/Vue?
-HTMX permite interatividade Ajax sem JavaScript customizado. Para um projeto educacional, reduz a curva de aprendizado mantendo a aplicação no paradigma server-side que os alunos já conhecem.
+### Por que React SPA em vez de Thymeleaf/HTMX?
+React separa claramente frontend e backend. O backend expõe uma API REST pura (JSON), o frontend é hospedável em CDN. JWT stateless elimina a necessidade de sessão no servidor.
 
 ### Por que Flyway para migrations?
 Controle versionado do schema do banco. Cada alteração no banco deve ser uma migration nova (nunca editar migrations já aplicadas). Garante rastreabilidade e reversibilidade.
 
-### Por que InMemoryUserDetailsManager?
-Simplifica o onboarding dos alunos. Para projetos reais, trocar por UserDetailsService com banco de dados.
+### Por que UserDetailsService com banco de dados?
+Autenticação persistida no PostgreSQL via `Usuario` entity. Senhas armazenadas com BCrypt. JWT gerado com `JwtService` e validado por `JwtAuthFilter` em cada requisição.
 
 ### Por que perfil 'security' separado?
 SpotBugs e OWASP Dependency-Check são lentos. Separar em perfil permite que o build do dia-a-dia seja rápido, rodando segurança no CI.
@@ -117,10 +119,8 @@ SpotBugs e OWASP Dependency-Check são lentos. Separar em perfil permite que o b
 | Trivy (image) | Vulnerabilidades na imagem Docker | `trivy image mercado:latest` |
 | OWASP Dependency-Check | CVEs em dependências | `mvn verify -Psecurity` |
 
-## Para Alunos: Próximos Passos Sugeridos
-1. Renomear `Produto` para sua entidade principal
-2. Adicionar campos específicos do seu domínio
-3. Criar novas migrations Flyway para as alterações no banco
-4. Adicionar novos controllers seguindo o padrão HTMX
-5. Configurar autenticação baseada em banco de dados
-6. Adicionar testes para cada service criado
+## Acesso Local
+- **App**: http://localhost:8121
+- **Login padrão**: definido em `.env` (ADMIN_EMAIL / ADMIN_SENHA)
+- **Adminer (DB UI)**: http://localhost:8888
+- **Health Check**: http://localhost:8121/actuator/health
