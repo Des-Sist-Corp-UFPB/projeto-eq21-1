@@ -1,5 +1,7 @@
 package br.ufpb.dsc.mercado.exception;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -12,6 +14,8 @@ import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(FunkoNaoEncontradoException.class)
     public ResponseEntity<Map<String, String>> handleFunkoNaoEncontrado(FunkoNaoEncontradoException ex) {
@@ -41,5 +45,12 @@ public class GlobalExceptionHandler {
                 ));
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(Map.of("erro", "Dados inválidos", "campos", campos));
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Map<String, String>> handleErroInterno(Exception ex) {
+        log.error("Erro interno não tratado: {}", ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("erro", "Erro interno do servidor"));
     }
 }
