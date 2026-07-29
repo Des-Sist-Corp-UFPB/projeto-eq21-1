@@ -4,6 +4,7 @@ import br.ufpb.dsc.mercado.domain.Funko;
 import br.ufpb.dsc.mercado.dto.FunkoRequest;
 import br.ufpb.dsc.mercado.exception.FunkoNaoEncontradoException;
 import br.ufpb.dsc.mercado.repository.FunkoRepository;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -53,6 +54,7 @@ public class FunkoService {
     }
 
     @Transactional
+    @WithSpan("criar-funko")
     public Funko criar(FunkoRequest request, MultipartFile imagem) throws IOException {
         Funko funko = new Funko(request.nome(), request.franquia(), request.preco());
         if (imagem != null && !imagem.isEmpty()) {
@@ -62,6 +64,7 @@ public class FunkoService {
     }
 
     @Transactional
+    @WithSpan("atualizar-funko")
     public Funko atualizar(Long id, FunkoRequest request, MultipartFile imagem) throws IOException {
         Funko funko = buscarPorId(id);
         funko.setNome(request.nome());
