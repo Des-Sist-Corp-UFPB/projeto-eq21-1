@@ -116,6 +116,18 @@ services:
       OPENAI_BASE_URL: ${OPENAI_BASE_URL}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       OPENAI_MODEL: ${OPENAI_MODEL}
+      # ---------------------------------------------------------------------
+      # OpenTelemetry — telemetria (traces, métricas e logs) para o servidor
+      # central da disciplina. O agente já vem embutido na imagem e é
+      # anexado pelo ENTRYPOINT do docker/Dockerfile (-javaagent).
+      # ---------------------------------------------------------------------
+      OTEL_SERVICE_NAME: dsc-eq21
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT}
+      OTEL_EXPORTER_OTLP_PROTOCOL: ${OTEL_EXPORTER_OTLP_PROTOCOL}
+      OTEL_EXPORTER_OTLP_HEADERS: ${OTEL_EXPORTER_OTLP_HEADERS}
+      OTEL_TRACES_EXPORTER: otlp
+      OTEL_METRICS_EXPORTER: otlp
+      OTEL_LOGS_EXPORTER: otlp
     ports:
       - "127.0.0.1:8121:8121"
     depends_on:
