@@ -29,10 +29,19 @@
         <dependency-check-maven.version>11.1.1</dependency-check-maven.version>
         <versions-maven-plugin.version>2.18.0</versions-maven-plugin.version>
         <jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
+        <opentelemetry.version>1.44.0</opentelemetry.version>
+        <opentelemetry-annotations.version>1.32.0</opentelemetry-annotations.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-bom</artifactId>
+                <version>${opentelemetry.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <dependency>
                 <groupId>software.amazon.awssdk</groupId>
                 <artifactId>bom</artifactId>
@@ -141,12 +150,11 @@
         <dependency>
             <groupId>io.opentelemetry</groupId>
             <artifactId>opentelemetry-api</artifactId>
-            <version>1.44.0</version>
         </dependency>
         <dependency>
             <groupId>io.opentelemetry.instrumentation</groupId>
             <artifactId>opentelemetry-instrumentation-annotations</artifactId>
-            <version>2.10.0-alpha</version>
+            <version>${opentelemetry-annotations.version}</version>
         </dependency>
 
         <!-- === TESTES === -->

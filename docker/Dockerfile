@@ -31,7 +31,7 @@ COPY src ./src
 # Copia o dist do React para os recursos estáticos do Spring Boot
 COPY --from=frontend-builder /frontend/dist ./src/main/resources/static/
 
-RUN mvn clean package -DskipTests -B -q
+RUN mvn clean package -DskipTests -B
 
 # ---- Estágio 3: Runtime -----------------------------------------------------
 FROM eclipse-temurin:21-jre-jammy AS runtime
