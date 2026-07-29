@@ -43,7 +43,11 @@ WORKDIR /app
 
 COPY --from=builder /build/target/*.jar app.jar
 
-RUN chown mercado:mercado app.jar
+# Agente Java do OpenTelemetry — instrumentação automática de traces, métricas
+# e logs (Logback), sem alterar o código da aplicação.
+ADD https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar otel-javaagent.jar
+
+RUN chown mercado:mercado app.jar otel-javaagent.jar
 
 USER mercado
 
@@ -53,6 +57,7 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD wget -qO- http://localhost:8121/actuator/health || exit 1
 
 ENTRYPOINT ["java", \
+    "-javaagent:/app/otel-javaagent.jar", \
     "-XX:+UseContainerSupport", \
     "-XX:MaxRAMPercentage=75.0", \
     "-Dspring.profiles.active=prod", \
