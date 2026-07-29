@@ -34,7 +34,7 @@ public class SecurityConfig {
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/ping", "/actuator/health").permitAll()
+                        .requestMatchers("/ping", "/ping/**", "/actuator/health").permitAll()
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/funkos", "/api/funkos/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/uploads/imagens").permitAll()
