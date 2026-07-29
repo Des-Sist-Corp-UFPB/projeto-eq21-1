@@ -2,6 +2,7 @@ package br.ufpb.dsc.mercado.controller;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -23,26 +24,37 @@ public class PingController {
     private final JdbcTemplate jdbcTemplate;
 
     @Value("${spring.application.name:eq21}")
-    private String serviceName;
+    private String serviceName = "eq21";
 
-    public PingController(JdbcTemplate jdbcTemplate) {
+    public PingController() {
+        this.jdbcTemplate = null;
+    }
+
+    @Autowired
+    public PingController(@Autowired(required = false) JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
     @GetMapping(value = {"/ping", "/ping/"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Map<String, Object> ping() {
+        return ping(null);
+    }
+
     public Map<String, Object> ping(@RequestParam(value = "service", required = false) String serviceOverride) {
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("status", "ok");
-        response.put("service", serviceOverride != null ? serviceOverride : serviceName);
+        response.put("service", serviceOverride != null ? serviceOverride : (serviceName != null ? serviceName : "eq21"));
         response.put("timestamp", Instant.now().toString());
 
-        try {
-            jdbcTemplate.queryForObject("SELECT 1", Integer.class);
-        } catch (Exception e) {
-            log.warn("Falha de verificação de conexão com banco no /ping", e);
-            response.put("status", "degraded");
-            response.put("database", "down");
-            response.put("databaseError", e.getMessage());
+        if (jdbcTemplate != null) {
+            try {
+                jdbcTemplate.queryForObject("SELECT 1", Integer.class);
+            } catch (Exception e) {
+                log.warn("Falha de verificação de conexão com banco no /ping", e);
+                response.put("status", "degraded");
+                response.put("database", "down");
+                response.put("databaseError", e.getMessage());
+            }
         }
 
         return response;
