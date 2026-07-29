@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BucketInitializer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">eq21</a> &gt; <a href="index.source.html" class="el_package">br.ufpb.dsc.mercado.config</a> &gt; <span class="el_source">BucketInitializer.java</span></div><h1>BucketInitializer.java</h1><pre class="source lang-java linenums">package br.ufpb.dsc.mercado.config;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
+import org.springframework.stereotype.Component;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
+import software.amazon.awssdk.services.s3.model.HeadBucketRequest;
+import software.amazon.awssdk.services.s3.model.NoSuchBucketException;
+import software.amazon.awssdk.services.s3.model.PutBucketPolicyRequest;
+
+@Component
+public class BucketInitializer implements ApplicationRunner {
+
+<span class="fc" id="L18">    private static final Logger log = LoggerFactory.getLogger(BucketInitializer.class);</span>
+
+    private final S3Client s3Client;
+
+    @Value(&quot;${aws.s3.bucket}&quot;)
+    private String bucket;
+
+<span class="fc" id="L25">    public BucketInitializer(S3Client s3Client) {</span>
+<span class="fc" id="L26">        this.s3Client = s3Client;</span>
+<span class="fc" id="L27">    }</span>
+
+    @Override
+    public void run(ApplicationArguments args) {
+        try {
+<span class="fc" id="L32">            criarBucketSeNecessario();</span>
+<span class="fc" id="L33">            aplicarPoliticaPublica();</span>
+<span class="fc" id="L34">        } catch (Exception e) {</span>
+<span class="fc" id="L35">            log.warn(&quot;Não foi possível configurar o bucket MinIO: {}&quot;, e.getMessage());</span>
+<span class="fc" id="L36">        }</span>
+<span class="fc" id="L37">    }</span>
+
+    private void criarBucketSeNecessario() {
+        try {
+<span class="fc" id="L41">            s3Client.headBucket(HeadBucketRequest.builder().bucket(bucket).build());</span>
+<span class="fc" id="L42">        } catch (NoSuchBucketException e) {</span>
+<span class="fc" id="L43">            s3Client.createBucket(CreateBucketRequest.builder().bucket(bucket).build());</span>
+<span class="fc" id="L44">            log.info(&quot;Bucket '{}' criado.&quot;, bucket);</span>
+<span class="fc" id="L45">        }</span>
+<span class="fc" id="L46">    }</span>
+
+    private void aplicarPoliticaPublica() {
+<span class="fc" id="L49">        String policy = &quot;&quot;&quot;</span>
+                {
+                  &quot;Version&quot;: &quot;2012-10-17&quot;,
+                  &quot;Statement&quot;: [
+                    {
+                      &quot;Effect&quot;: &quot;Allow&quot;,
+                      &quot;Principal&quot;: {&quot;AWS&quot;: [&quot;*&quot;]},
+                      &quot;Action&quot;: [&quot;s3:GetObject&quot;],
+                      &quot;Resource&quot;: [&quot;arn:aws:s3:::%s/*&quot;]
+                    }
+                  ]
+                }
+<span class="fc" id="L61">                &quot;&quot;&quot;.formatted(bucket);</span>
+
+<span class="fc" id="L63">        s3Client.putBucketPolicy(PutBucketPolicyRequest.builder()</span>
+<span class="fc" id="L64">                .bucket(bucket)</span>
+<span class="fc" id="L65">                .policy(policy)</span>
+<span class="fc" id="L66">                .build());</span>
+<span class="fc" id="L67">        log.info(&quot;Política pública de leitura aplicada no bucket '{}'.&quot;, bucket);</span>
+<span class="fc" id="L68">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

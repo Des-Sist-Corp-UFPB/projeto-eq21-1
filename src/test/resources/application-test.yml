@@ -14,6 +14,29 @@ spring:
     # O Flyway executa as migrações no container PostgreSQL antes dos testes.
     locations: classpath:db/migration
 
+# Valores de teste — substituem variáveis de ambiente ausentes no perfil de teste
+jwt:
+  secret: test-secret-key-for-junit-testing-must-be-at-least-32-chars-long
+  expiration-ms: 86400000
+
+admin:
+  email: admin@test.com
+  senha: admin123
+
+aws:
+  s3:
+    endpoint: http://localhost:9000
+    public-endpoint: http://localhost:9000
+    region: us-east-1
+    bucket: test-bucket
+    access-key: test-access-key
+    secret-key: test-secret-key
+
+openai:
+  base-url: http://localhost:1234/v1
+  api-key: test-api-key-for-tests
+  model: gpt-4o
+
 logging:
   level:
     br.ufpb.dsc.mercado: DEBUG

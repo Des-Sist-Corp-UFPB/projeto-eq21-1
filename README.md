@@ -385,8 +385,7 @@ Para habilitar a automação completa no GitHub:
 ## 🤝 Equipe e Créditos
 
 Desenvolvido pela **Equipe 21**:
-- **Emilly Poliane**
-- **Victor Kawê**
+- **Emilly Carmo**
 - **Equipe 21 — Projeto DSC UFPB**
 
 Orientação: **Prof. Rodrigo Rebouças**  
