@@ -388,6 +388,7 @@ Desenvolvido pela **Equipe 21**:
 - **Emilly Poliane**
 - **Victor Kawê**
 - **Equipe 21 — Projeto DSC UFPB**
+- [Vídeo de apresentação do sistema](https://drive.google.com/file/d/1vtvoVyY4BWM0Rlclss6lCApiNIKIlPae/view?usp=sharing)
 
 Orientação: **Prof. Rodrigo Rebouças**  
 Universidade Federal da Paraíba (UFPB) — Campus IV  
