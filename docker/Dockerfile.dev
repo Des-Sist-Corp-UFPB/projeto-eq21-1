@@ -20,10 +20,18 @@ WORKDIR /app
 COPY pom.xml .
 RUN mvn dependency:go-offline -B
 
+
+# Agente Java do OpenTelemetry — instrumentação automática de traces, métricas
+# e logs (Logback), sem alterar o código da aplicação.
+ADD https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar /otel-javaagent.jar
+
 # O restante do código-fonte é montado via volume no docker-compose.
 # Isso permite hot-reload sem reconstruir a imagem.
 
-EXPOSE 8080
+EXPOSE 8121
 
-# Spring DevTools requer o argumento -Dspring-boot.run.fork=false para funcionar em container
-CMD ["mvn", "spring-boot:run", "-Dspring-boot.run.jvmArguments=-Dspring.profiles.active=dev"]
+# -Dspring-boot.run.fork=false necessário para hot-reload funcionar dentro do container.
+# Como fork=false roda a app na MESMA JVM do Maven, "-javaagent" via jvmArguments
+# é ignorado — o agente OTel é anexado via variável de ambiente JAVA_TOOL_OPTIONS
+# (definida no docker-compose.dev.yml), que o launcher "java" do Maven já respeita.
+CMD ["mvn", "spring-boot:run", "-Dspring-boot.run.fork=false", "-Dspring-boot.run.jvmArguments=-Dspring.profiles.active=dev"]

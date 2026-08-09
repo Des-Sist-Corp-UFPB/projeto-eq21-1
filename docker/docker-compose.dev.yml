@@ -4,15 +4,19 @@
 # Sobe o ambiente completo de desenvolvimento com:
 #   - app:      Aplicação Spring Boot com hot-reload
 #   - postgres: Banco de dados PostgreSQL 16
-#   - adminer:  Interface web para inspecionar o banco (http://localhost:8888)
+#   - minio:    Armazenamento de objetos S3-compatível (imagens dos Funkos)
+#   - pgadmin:  Interface web para inspecionar o banco (http://localhost:8888)
 #   - trivy:    Scanner de vulnerabilidades (roda uma vez e sai)
 #
 # Como usar:
 #   docker compose -f docker/docker-compose.dev.yml up
 #   docker compose -f docker/docker-compose.dev.yml up --build  # forçar rebuild
 #
-# Para rodar só o banco:
-#   docker compose -f docker/docker-compose.dev.yml up postgres adminer
+# Para rodar só o banco + MinIO (app via mvn localmente):
+#   docker compose -f docker/docker-compose.dev.yml up postgres minio pgadmin
+#
+# Acesso MinIO Console (criar bucket "eq21" na primeira execução):
+#   http://localhost:9001  (usuário: valor de MINIO_ACCESS_KEY, senha: MINIO_SECRET)
 # =============================================================================
 
 services:
@@ -22,22 +26,54 @@ services:
   # ---------------------------------------------------------------------------
   postgres:
     image: postgres:16-alpine
-    container_name: mercado-postgres-dev
+    container_name: funko-postgres-dev
+    env_file:
+      - path: ../.env
+        required: true
     environment:
-      POSTGRES_DB: mercado_dev
-      POSTGRES_USER: mercado
-      POSTGRES_PASSWORD: mercado123
+      POSTGRES_DB: eq21
+      POSTGRES_USER: eq21
+      POSTGRES_PASSWORD: x8GiTTdz8a26UigqHZHg
     ports:
       - "5432:5432"
     volumes:
       - postgres-dev-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U mercado -d mercado_dev"]
+      test: ["CMD-SHELL", "pg_isready -U eq21 -d eq21"]
       interval: 10s
       timeout: 5s
       retries: 5
     networks:
-      - mercado-net
+      - funko-net
+
+  # ---------------------------------------------------------------------------
+  # MinIO: armazenamento de imagens S3-compatível
+  # Console: http://localhost:9001
+  # API:     http://localhost:9000
+  # Na primeira execução, crie o bucket "eq21" pelo Console ou via mc.
+  # ---------------------------------------------------------------------------
+  minio:
+    image: minio/minio:latest
+    container_name: funko-minio-dev
+    env_file:
+      - path: ../.env
+        required: true
+    environment:
+      MINIO_ROOT_USER: eq21
+      MINIO_ROOT_PASSWORD: AJtRLoCwgqgRXfAYEhulfaUR
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio-dev-data:/data
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - funko-net
 
   # ---------------------------------------------------------------------------
   # Aplicação Spring Boot (hot-reload)
@@ -46,14 +82,37 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile.dev
-    container_name: mercado-app-dev
+    container_name: funko-app-dev
+    env_file:
+      - path: ../.env
+        required: true
     environment:
       SPRING_PROFILES_ACTIVE: dev
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/mercado_dev
-      SPRING_DATASOURCE_USERNAME: mercado
-      SPRING_DATASOURCE_PASSWORD: mercado123
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/eq21
+      DB_USERNAME: eq21
+      DB_PASSWORD: x8GiTTdz8a26UigqHZHg
+      MINIO_ACCESS_KEY: eq21
+      MINIO_SECRET: AJtRLoCwgqgRXfAYEhulfaUR
+      JWT_SECRET: 7b2c9a1d4f8e6b3a0c5d2e9f4b8a1c7d3e6f9a0b2c5d8e1f4a7b0c3d6e9f2a5b
+      JWT_EXPIRATION_MS: 86400000
+      # Sobrescreve application-dev.yml que aponta para localhost:9000
+      AWS_S3_ENDPOINT: http://minio:9000
+      AWS_S3_PUBLIC_ENDPOINT: http://localhost:9000
+      # ---------------------------------------------------------------------
+      # OpenTelemetry — telemetria (traces, métricas e logs) para o servidor
+      # central da disciplina. JAVA_TOOL_OPTIONS anexa o agente porque a app
+      # roda com "spring-boot.run.fork=false" (ver docker/Dockerfile.dev).
+      # ---------------------------------------------------------------------
+      JAVA_TOOL_OPTIONS: -javaagent:/otel-javaagent.jar
+      OTEL_SERVICE_NAME: dsc-eq21
+      OTEL_EXPORTER_OTLP_ENDPOINT: https://otel.dsc.rodrigor.com
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_EXPORTER_OTLP_HEADERS: Authorization=Basic ZHNjLWVxMjE6NTE1OTY2OTQ2ZDBiZWY3MA==
+      OTEL_TRACES_EXPORTER: otlp
+      OTEL_METRICS_EXPORTER: otlp
+      OTEL_LOGS_EXPORTER: otlp
     ports:
-      - "8080:8080"
+      - "8121:8121"
     volumes:
       # Monta o código-fonte para hot-reload
       - ../src:/app/src
@@ -62,23 +121,29 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      minio:
+        condition: service_healthy
     networks:
-      - mercado-net
+      - funko-net
 
   # ---------------------------------------------------------------------------
-  # Adminer: interface web para o banco de dados
+  # pgAdmin: interface web para o banco de dados
   # Acesse: http://localhost:8888
-  # Servidor: postgres | Banco: mercado_dev | Usuário: mercado | Senha: mercado123
+  # Login: admin@admin.com / admin
+  # Adicione o servidor: Host=postgres, Banco=eq21, Usuário=eq21
   # ---------------------------------------------------------------------------
-  adminer:
-    image: adminer:latest
-    container_name: mercado-adminer
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: funko-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
     ports:
-      - "8888:8080"
+      - "8888:80"
     depends_on:
       - postgres
     networks:
-      - mercado-net
+      - funko-net
 
   # ---------------------------------------------------------------------------
   # Trivy: scanner de vulnerabilidades (roda e sai — profile: scan)
@@ -86,7 +151,7 @@ services:
   # ---------------------------------------------------------------------------
   trivy:
     image: aquasec/trivy:latest
-    container_name: mercado-trivy
+    container_name: funko-trivy
     profiles:
       - scan
     volumes:
@@ -94,13 +159,14 @@ services:
       - trivy-cache:/root/.cache/trivy
     command: fs /project --severity HIGH,CRITICAL --exit-code 1
     networks:
-      - mercado-net
+      - funko-net
 
 volumes:
   postgres-dev-data:
+  minio-dev-data:
   maven-cache:
   trivy-cache:
 
 networks:
-  mercado-net:
+  funko-net:
     driver: bridge

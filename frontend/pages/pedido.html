@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fazer Pedido – Trokets</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/css/style.css" />
+  <script defer src="https://umami.dsc.rodrigor.com/script.js" data-website-id="6cc4079a-e729-4549-95c7-b39d17592485"></script>
+  <style>
+    /* ===== TOKENS ===== */
+    :root {
+      --cream:        #DDC595;
+      --cream-light:  #F0E0BB;
+      --cream-dark:   #C8AA75;
+      --green:        #4D6E26;
+      --green-dark:   #3A5219;
+      --green-light:  #6A9435;
+      --offwhite:     #FAF5EC;
+      --dark:         #1C1C1C;
+      --gray:         #6B6B6B;
+      --gray-light:   #E8E3DA;
+      --danger:       #C0392B;
+      --radius:       18px;
+      --shadow:       0 4px 24px rgba(77,110,38,.12);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: var(--offwhite);
+      color: var(--dark);
+      min-height: 100vh;
+    }
+
+    /* ===== NAVBAR ===== */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 5%;
+      background: rgba(250,245,236,.93);
+      backdrop-filter: blur(12px);
+      border-bottom: 2px solid var(--cream);
+    }
+    .nav-logo img { height: 48px; }
+    .nav-back {
+      display: flex; align-items: center; gap: 8px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: .9rem;
+      color: var(--green);
+      transition: color .2s;
+    }
+    .nav-back:hover { color: var(--green-dark); }
+    .nav-back svg { width: 18px; height: 18px; }
+
+    /* ===== PAGE HEADER ===== */
+    .page-header {
+      padding: 120px 5% 48px;
+      text-align: center;
+      background: linear-gradient(160deg, var(--offwhite) 60%, var(--cream-light) 100%);
+    }
+    .page-badge {
+      display: inline-block;
+      background: var(--cream);
+      color: var(--green-dark);
+      font-weight: 700;
+      font-size: .78rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      padding: 5px 16px;
+      border-radius: 50px;
+      margin-bottom: 16px;
+    }
+    .page-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 4vw, 3rem);
+      color: var(--green-dark);
+      margin-bottom: 12px;
+    }
+    .page-sub {
+      color: var(--gray);
+      font-size: 1rem;
+      max-width: 500px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+
+    /* ===== LAYOUT ===== */
+    .form-layout {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 0 5% 80px;
+    }
+
+    /* ===== STEPS ===== */
+    .steps {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      margin: 40px 0 36px;
+    }
+    .step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      flex: 1;
+    }
+    .step-circle {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: var(--gray-light);
+      color: var(--gray);
+      font-weight: 800;
+      font-size: .9rem;
+      display: flex; align-items: center; justify-content: center;
+      border: 2px solid var(--gray-light);
+      transition: all .3s;
+    }
+    .step-circle.active {
+      background: var(--green);
+      color: #fff;
+      border-color: var(--green);
+    }
+    .step-circle.done {
+      background: var(--cream);
+      color: var(--green-dark);
+      border-color: var(--cream-dark);
+    }
+    .step-label {
+      font-size: .72rem;
+      font-weight: 700;
+      color: var(--gray);
+      text-align: center;
+      letter-spacing: .04em;
+    }
+    .step-label.active { color: var(--green); }
+    .step-line {
+      flex: 1;
+      height: 2px;
+      background: var(--gray-light);
+      margin-bottom: 22px;
+      transition: background .3s;
+    }
+    .step-line.done { background: var(--cream-dark); }
+
+    /* ===== CARD SECTION ===== */
+    .form-card {
+      background: #fff;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 32px 36px;
+      margin-bottom: 20px;
+    }
+    .form-card-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem;
+      color: var(--green-dark);
+      margin-bottom: 4px;
+    }
+    .form-card-sub {
+      font-size: .88rem;
+      color: var(--gray);
+      margin-bottom: 24px;
+    }
+
+    /* ===== FORM FIELDS ===== */
+    .field { margin-bottom: 20px; }
+    .field label {
+      display: block;
+      font-size: .85rem;
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: 7px;
+      letter-spacing: .03em;
+    }
+    .field label .req { color: var(--danger); margin-left: 2px; }
+    .field input,
+    .field textarea,
+    .field select {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid var(--gray-light);
+      border-radius: 12px;
+      font-family: 'Nunito', sans-serif;
+      font-size: .95rem;
+      color: var(--dark);
+      background: #fff;
+      transition: border-color .2s, box-shadow .2s;
+      outline: none;
+      appearance: none;
+    }
+    .field input:focus,
+    .field textarea:focus,
+    .field select:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(77,110,38,.12);
+    }
+    .field textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
+    .field-hint {
+      font-size: .78rem;
+      color: var(--gray);
+      margin-top: 5px;
+    }
+    .field-error {
+      font-size: .78rem;
+      color: var(--danger);
+      margin-top: 5px;
+      display: none;
+    }
+    .field.has-error input,
+    .field.has-error textarea,
+    .field.has-error select {
+      border-color: var(--danger);
+    }
+    .field.has-error .field-error { display: block; }
+
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    /* ===== ESTILO SELECTOR ===== */
+    .estilo-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 4px;
+    }
+    .estilo-card {
+      border: 2px solid var(--gray-light);
+      border-radius: 14px;
+      padding: 16px 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: all .2s;
+      background: #fff;
+    }
+    .estilo-card:hover { border-color: var(--cream-dark); background: var(--offwhite); }
+    .estilo-card.selected {
+      border-color: var(--green);
+      background: #f3f8ec;
+    }
+    .estilo-card input[type="radio"] { display: none; }
+    .estilo-icon { font-size: 2rem; margin-bottom: 8px; display: block; }
+    .estilo-name {
+      font-weight: 800;
+      font-size: .9rem;
+      color: var(--dark);
+      margin-bottom: 3px;
+    }
+    .estilo-price {
+      font-size: .78rem;
+      color: var(--green);
+      font-weight: 700;
+    }
+    .estilo-card.selected .estilo-name { color: var(--green-dark); }
+
+    /* ===== POSIÇÃO SELECTOR ===== */
+    .posicao-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 4px;
+    }
+    .posicao-btn {
+      border: 2px solid var(--gray-light);
+      border-radius: 10px;
+      padding: 10px 14px;
+      cursor: pointer;
+      transition: all .2s;
+      background: #fff;
+      font-family: 'Nunito', sans-serif;
+      font-size: .85rem;
+      font-weight: 700;
+      color: var(--gray);
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .posicao-btn:hover { border-color: var(--cream-dark); }
+    .posicao-btn.selected {
+      border-color: var(--green);
+      background: #f3f8ec;
+      color: var(--green-dark);
+    }
+    .posicao-btn input[type="radio"] { display: none; }
+
+    /* ===== UPLOAD AREA ===== */
+    .upload-area {
+      border: 2px dashed var(--cream-dark);
+      border-radius: 14px;
+      padding: 28px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all .2s;
+      background: var(--offwhite);
+      position: relative;
+    }
+    .upload-area:hover,
+    .upload-area.drag-over {
+      border-color: var(--green);
+      background: #f3f8ec;
+    }
+    .upload-area input[type="file"] {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      opacity: 0; cursor: pointer;
+    }
+    .upload-icon { font-size: 2.2rem; margin-bottom: 10px; }
+    .upload-title {
+      font-weight: 800;
+      font-size: .95rem;
+      color: var(--green-dark);
+      margin-bottom: 4px;
+    }
+    .upload-sub { font-size: .82rem; color: var(--gray); }
+    .upload-limit { font-size: .75rem; color: var(--gray); margin-top: 4px; }
+
+    /* ===== PREVIEW DE IMAGENS ===== */
+    .preview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .preview-item {
+      position: relative;
+      aspect-ratio: 1;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 2px solid var(--gray-light);
+    }
+    .preview-item img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+    }
+    .preview-remove {
+      position: absolute;
+      top: 4px; right: 4px;
+      width: 22px; height: 22px;
+      background: rgba(0,0,0,.55);
+      border-radius: 50%;
+      border: none;
+      color: #fff;
+      font-size: .85rem;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      line-height: 1;
+      transition: background .15s;
+    }
+    .preview-remove:hover { background: var(--danger); }
+
+    /* ===== RESUMO ===== */
+    .resumo-box {
+      background: var(--offwhite);
+      border: 2px solid var(--cream);
+      border-radius: 14px;
+      padding: 20px 22px;
+      margin-top: 20px;
+    }
+    .resumo-title {
+      font-weight: 800;
+      font-size: .9rem;
+      color: var(--green-dark);
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+    .resumo-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: .88rem;
+      margin-bottom: 6px;
+      gap: 12px;
+    }
+    .resumo-label { color: var(--gray); font-weight: 600; white-space: nowrap; }
+    .resumo-value { color: var(--dark); font-weight: 700; text-align: right; }
+
+    /* ===== BOTÕES ===== */
+    .btn-primary {
+      width: 100%;
+      background: var(--green);
+      color: #fff;
+      border: none;
+      padding: 16px 32px;
+      border-radius: 50px;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 900;
+      font-size: 1.05rem;
+      cursor: pointer;
+      transition: background .2s, transform .15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 24px;
+    }
+    .btn-primary:hover { background: var(--green-dark); transform: translateY(-2px); }
+    .btn-primary:active { transform: translateY(0); }
+    .btn-primary:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+
+    .btn-secondary {
+      width: 100%;
+      background: transparent;
+      color: var(--green);
+      border: 2px solid var(--green);
+      padding: 14px 32px;
+      border-radius: 50px;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 800;
+      font-size: .95rem;
+      cursor: pointer;
+      transition: all .2s;
+      margin-top: 10px;
+    }
+    .btn-secondary:hover { background: var(--green); color: #fff; }
+
+    /* ===== WHATSAPP BADGE ===== */
+    .wpp-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #e7f7ee;
+      border: 1.5px solid #a8d5b5;
+      border-radius: 12px;
+      padding: 12px 16px;
+      margin-top: 16px;
+      font-size: .85rem;
+      color: #1a5c33;
+      font-weight: 700;
+    }
+    .wpp-badge svg { width: 22px; height: 22px; flex-shrink: 0; }
+
+    /* ===== TOAST ===== */
+    .toast {
+      position: fixed;
+      bottom: 28px; left: 50%; transform: translateX(-50%) translateY(80px);
+      background: var(--green-dark);
+      color: #fff;
+      padding: 14px 28px;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: .92rem;
+      z-index: 999;
+      transition: transform .35s cubic-bezier(.34,1.56,.64,1);
+      white-space: nowrap;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 600px) {
+      .form-card { padding: 22px 18px; }
+      .estilo-grid { grid-template-columns: 1fr; }
+      .posicao-grid { grid-template-columns: 1fr; }
+      .field-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav>
+    <a class="nav-logo" href="index.html"><img src="../assets/img/logo.png" alt="Trokets" /></a>
+    <a class="nav-back" href="index.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      Voltar à loja
+    </a>
+  </nav>
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <span class="page-badge">✦ Encomenda personalizada</span>
+    <h1 class="page-title">Fazer meu pedido</h1>
+    <p class="page-sub">Preencha os detalhes do seu personagem e enviaremos tudo pelo WhatsApp para confirmar.</p>
+  </div>
+
+  <!-- FORM -->
+  <div class="form-layout">
+
+    <!-- STEPS -->
+    <div class="steps">
+      <div class="step">
+        <div class="step-circle active" id="step-dot-1">1</div>
+        <span class="step-label active" id="step-lbl-1">Personagem</span>
+      </div>
+      <div class="step-line" id="step-line-1"></div>
+      <div class="step">
+        <div class="step-circle" id="step-dot-2">2</div>
+        <span class="step-label" id="step-lbl-2">Referências</span>
+      </div>
+      <div class="step-line" id="step-line-2"></div>
+      <div class="step">
+        <div class="step-circle" id="step-dot-3">3</div>
+        <span class="step-label" id="step-lbl-3">Confirmar</span>
+      </div>
+    </div>
+
+    <!-- STEP 1: PERSONAGEM -->
+    <div id="passo-1">
+
+      <div class="form-card">
+        <div class="form-card-title">Sobre o personagem</div>
+        <div class="form-card-sub">Nos conte quem vai virar boneco! 🎭</div>
+
+        <div class="field" id="field-nome">
+          <label>Nome do personagem <span class="req">*</span></label>
+          <input type="text" id="nome" placeholder="Ex: Naruto Uzumaki, Minha namorada, Meu cachorro Thor..." maxlength="100" />
+          <div class="field-error">Por favor, informe o nome do personagem.</div>
+        </div>
+
+        <div class="field" id="field-descricao">
+          <label>Descrição <span class="req">*</span></label>
+          <textarea id="descricao" placeholder="Descreva o personagem: características físicas, roupa, cor dos olhos, cabelo, detalhes importantes..." maxlength="600"></textarea>
+          <div class="field-hint">Quanto mais detalhes, mais fiel ficará o boneco! 🎨</div>
+          <div class="field-error">Por favor, descreva o personagem.</div>
+        </div>
+
+        <div class="field">
+          <label>Posição / Pose do boneco <span class="req">*</span></label>
+          <div class="posicao-grid" id="posicao-grid">
+            <label class="posicao-btn" id="pos-em-pe">
+              <input type="radio" name="posicao" value="Em pé" />
+              🧍 Em pé
+            </label>
+            <label class="posicao-btn" id="pos-sentado">
+              <input type="radio" name="posicao" value="Sentado" />
+              🪑 Sentado
+            </label>
+            <label class="posicao-btn" id="pos-action">
+              <input type="radio" name="posicao" value="Pose de ação" />
+              ⚡ Pose de ação
+            </label>
+            <label class="posicao-btn" id="pos-outro">
+              <input type="radio" name="posicao" value="Outra pose" />
+              ✏️ Outra pose
+            </label>
+          </div>
+          <div class="field-error" id="posicao-error" style="display:none; margin-top:6px;">Selecione uma posição.</div>
+          <input type="text" id="posicao-outra" placeholder="Descreva a pose desejada..." style="margin-top:10px; display:none;" maxlength="150" />
+        </div>
+      </div>
+
+      <div class="form-card">
+        <div class="form-card-title">Estilo de modelagem</div>
+        <div class="form-card-sub">Escolha o estilo que mais combina com seu personagem.</div>
+
+        <div class="estilo-grid" id="field-estilo">
+          <label class="estilo-card" id="estilo-funko">
+            <input type="radio" name="estilo" value="Funko Pop" />
+            <span class="estilo-icon">🎭</span>
+            <div class="estilo-name">Funko Pop</div>
+            <div class="estilo-price">A partir de R$ 35</div>
+          </label>
+          <label class="estilo-card" id="estilo-chibi">
+            <input type="radio" name="estilo" value="Chibi" />
+            <span class="estilo-icon">🌸</span>
+            <div class="estilo-name">Chibi</div>
+            <div class="estilo-price">A partir de R$ 25</div>
+          </label>
+          <label class="estilo-card" id="estilo-outro">
+            <input type="radio" name="estilo" value="Outro" />
+            <span class="estilo-icon">✨</span>
+            <div class="estilo-name">Outro</div>
+            <div class="estilo-price">Valor a combinar</div>
+          </label>
+        </div>
+        <div class="field-error" id="estilo-error" style="display:none; margin-top:10px;">Selecione um estilo.</div>
+      </div>
+
+      <div class="form-card">
+        <div class="form-card-title">Seus dados para contato</div>
+        <div class="form-card-sub">Para confirmarmos o pedido por WhatsApp.</div>
+
+        <div class="field-row">
+          <div class="field" id="field-cliente">
+            <label>Seu nome <span class="req">*</span></label>
+            <input type="text" id="cliente" placeholder="Como você se chama?" maxlength="80" />
+            <div class="field-error">Informe seu nome.</div>
+          </div>
+          <div class="field" id="field-telefone">
+            <label>Seu WhatsApp <span class="req">*</span></label>
+            <input type="tel" id="telefone" placeholder="(84) 99999-9999" maxlength="20" />
+            <div class="field-error">Informe seu WhatsApp.</div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Observações extras</label>
+          <textarea id="obs" placeholder="Algum detalhe adicional? Prazo especial, presente, ocasião..." maxlength="400" style="min-height:70px;"></textarea>
+        </div>
+      </div>
+
+      <button class="btn-primary" onclick="irParaPasso2()">
+        Próximo: Fotos de referência →
+      </button>
+    </div>
+
+    <!-- STEP 2: REFERÊNCIAS -->
+    <div id="passo-2" style="display:none;">
+
+      <div class="form-card">
+        <div class="form-card-title">Fotos de referência</div>
+        <div class="form-card-sub">Quanto mais referências você enviar, mais fiel ao original ficará seu boneco! (opcional)</div>
+
+        <div class="upload-area" id="upload-area">
+          <input type="file" id="file-input" accept="image/*" multiple />
+          <div class="upload-icon">📸</div>
+          <div class="upload-title">Clique ou arraste fotos aqui</div>
+          <div class="upload-sub">Fotos do personagem, referências de roupa, estilo...</div>
+          <div class="upload-limit">Até 5 imagens · JPG, PNG, WEBP</div>
+        </div>
+
+        <div class="preview-grid" id="preview-grid"></div>
+      </div>
+
+      <button class="btn-primary" onclick="irParaPasso3()">
+        Próximo: Revisar pedido →
+      </button>
+      <button class="btn-secondary" onclick="voltarPasso(1)">← Voltar</button>
+    </div>
+
+    <!-- STEP 3: CONFIRMAR -->
+    <div id="passo-3" style="display:none;">
+
+      <div class="form-card">
+        <div class="form-card-title">Revise seu pedido</div>
+        <div class="form-card-sub">Confirme os detalhes antes de enviar pelo WhatsApp.</div>
+
+        <div class="resumo-box" id="resumo-box"></div>
+
+        <div class="wpp-badge">
+          <svg viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.122 1.532 5.855L0 24l6.335-1.617A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.808 9.808 0 01-5.002-1.368l-.359-.213-3.722.95.988-3.61-.234-.371A9.818 9.818 0 012.182 12C2.182 6.58 6.58 2.182 12 2.182S21.818 6.58 21.818 12 17.42 21.818 12 21.818z"/></svg>
+          Ao clicar em "Enviar pedido", você será redirecionado para o WhatsApp da Trokets para confirmar os detalhes e combinar o pagamento.
+        </div>
+      </div>
+
+      <div class="form-card" style="background: #f3f8ec; border: 2px solid var(--cream);">
+        <div class="form-card-title" style="font-size:1.1rem;">Informações de pagamento e prazo</div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top:8px;">
+          <div>
+            <div style="font-size:.78rem; font-weight:700; color:var(--gray); text-transform:uppercase; letter-spacing:.06em; margin-bottom:6px;">Formas de pagamento</div>
+            <div style="font-size:.92rem; font-weight:700; color:var(--green-dark);">💳 Cartão</div>
+            <div style="font-size:.92rem; font-weight:700; color:var(--green-dark);">⚡ Pix</div>
+            <div style="font-size:.92rem; font-weight:700; color:var(--green-dark);">💵 Espécie</div>
+          </div>
+          <div>
+            <div style="font-size:.78rem; font-weight:700; color:var(--gray); text-transform:uppercase; letter-spacing:.06em; margin-bottom:6px;">Prazo de entrega</div>
+            <div style="font-size:1.6rem; font-weight:900; color:var(--green);">10–15</div>
+            <div style="font-size:.85rem; color:var(--gray); font-weight:700;">dias úteis após confirmação</div>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-primary" id="btn-enviar" onclick="enviarWhatsApp()">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.122 1.532 5.855L0 24l6.335-1.617A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.808 9.808 0 01-5.002-1.368l-.359-.213-3.722.95.988-3.61-.234-.371A9.818 9.818 0 012.182 12C2.182 6.58 6.58 2.182 12 2.182S21.818 6.58 21.818 12 17.42 21.818 12 21.818z"/></svg>
+        Enviar pedido pelo WhatsApp
+      </button>
+      <button class="btn-secondary" onclick="voltarPasso(2)">← Voltar</button>
+    </div>
+
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ===== CONFIG =====
+    const WPP_NUMBER = '5584996980815';
+
+    // ===== ESTADO =====
+    let imagensAnexadas = [];
+    let passoAtual = 1;
+
+    // ===== ESTILO CARDS =====
+    document.querySelectorAll('.estilo-card').forEach(card => {
+      card.addEventListener('click', () => {
+        document.querySelectorAll('.estilo-card').forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+        document.getElementById('estilo-error').style.display = 'none';
+      });
+    });
+
+    // ===== POSIÇÃO BTNS =====
+    document.querySelectorAll('.posicao-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.posicao-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        document.getElementById('posicao-error').style.display = 'none';
+        const outraInput = document.getElementById('posicao-outra');
+        outraInput.style.display = btn.querySelector('input').value === 'Outra pose' ? 'block' : 'none';
+      });
+    });
+
+    // ===== UPLOAD =====
+    const fileInput = document.getElementById('file-input');
+    const uploadArea = document.getElementById('upload-area');
+
+    fileInput.addEventListener('change', e => processarArquivos(e.target.files));
+
+    uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('drag-over'); });
+    uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('drag-over'));
+    uploadArea.addEventListener('drop', e => {
+      e.preventDefault();
+      uploadArea.classList.remove('drag-over');
+      processarArquivos(e.dataTransfer.files);
+    });
+
+    function processarArquivos(files) {
+      const arr = Array.from(files).filter(f => f.type.startsWith('image/'));
+      if (imagensAnexadas.length + arr.length > 5) {
+        mostrarToast('Máximo de 5 imagens permitido!');
+        return;
+      }
+      arr.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = e => {
+          imagensAnexadas.push({ nome: file.name, url: e.target.result });
+          renderizarPreviews();
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function renderizarPreviews() {
+      const grid = document.getElementById('preview-grid');
+      if (!imagensAnexadas.length) { grid.innerHTML = ''; return; }
+      grid.innerHTML = imagensAnexadas.map((img, i) => `
+        <div class="preview-item">
+          <img src="${img.url}" alt="Referência ${i+1}" />
+          <button class="preview-remove" onclick="removerImagem(${i})" title="Remover">✕</button>
+        </div>`).join('');
+    }
+
+    function removerImagem(idx) {
+      imagensAnexadas.splice(idx, 1);
+      renderizarPreviews();
+    }
+
+    // ===== STEPS =====
+    function atualizarSteps(passo) {
+      [1, 2, 3].forEach(n => {
+        const dot = document.getElementById(`step-dot-${n}`);
+        const lbl = document.getElementById(`step-lbl-${n}`);
+        dot.classList.remove('active', 'done');
+        lbl.classList.remove('active');
+        if (n < passo) { dot.classList.add('done'); dot.innerHTML = '✓'; }
+        else if (n === passo) { dot.classList.add('active'); dot.innerHTML = n; lbl.classList.add('active'); }
+        else { dot.innerHTML = n; }
+      });
+      [1, 2].forEach(n => {
+        const line = document.getElementById(`step-line-${n}`);
+        line.classList.toggle('done', n < passo);
+      });
+    }
+
+    function mostrarPasso(n) {
+      [1, 2, 3].forEach(i => {
+        document.getElementById(`passo-${i}`).style.display = i === n ? 'block' : 'none';
+      });
+      atualizarSteps(n);
+      passoAtual = n;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // ===== VALIDAÇÕES =====
+    function validarCampo(id, condicao) {
+      const el = document.getElementById(`field-${id}`);
+      if (el) { el.classList.toggle('has-error', !condicao); }
+      return condicao;
+    }
+
+    function irParaPasso2() {
+      const nome = document.getElementById('nome').value.trim();
+      const desc = document.getElementById('descricao').value.trim();
+      const posicao = document.querySelector('input[name="posicao"]:checked');
+      const estilo = document.querySelector('input[name="estilo"]:checked');
+      const cliente = document.getElementById('cliente').value.trim();
+      const telefone = document.getElementById('telefone').value.trim();
+
+      let ok = true;
+      ok = validarCampo('nome', nome.length > 0) && ok;
+      ok = validarCampo('descricao', desc.length > 0) && ok;
+      ok = validarCampo('cliente', cliente.length > 0) && ok;
+      ok = validarCampo('telefone', telefone.length > 0) && ok;
+
+      if (!posicao) {
+        document.getElementById('posicao-error').style.display = 'block';
+        ok = false;
+      }
+      if (!estilo) {
+        document.getElementById('estilo-error').style.display = 'block';
+        ok = false;
+      }
+      if (!ok) {
+        mostrarToast('Preencha todos os campos obrigatórios!');
+        document.querySelector('.has-error')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+      mostrarPasso(2);
+    }
+
+    function irParaPasso3() {
+      construirResumo();
+      mostrarPasso(3);
+    }
+
+    function voltarPasso(n) { mostrarPasso(n); }
+
+    // ===== RESUMO =====
+    function construirResumo() {
+      const posicao = document.querySelector('input[name="posicao"]:checked')?.value;
+      const posOutra = document.getElementById('posicao-outra').value.trim();
+      const estilo = document.querySelector('input[name="estilo"]:checked')?.value;
+      const precos = { 'Funko Pop': 'A partir de R$ 35,00', 'Chibi': 'A partir de R$ 25,00', 'Outro': 'Valor a combinar' };
+
+      const rows = [
+        ['Personagem', document.getElementById('nome').value.trim()],
+        ['Descrição', document.getElementById('descricao').value.trim()],
+        ['Posição', posicao === 'Outra pose' && posOutra ? `Outra: ${posOutra}` : posicao],
+        ['Estilo', estilo],
+        ['Preço estimado', precos[estilo] || 'A combinar'],
+        ['Fotos anexadas', imagensAnexadas.length > 0 ? `${imagensAnexadas.length} foto(s)` : 'Nenhuma'],
+        ['Seu nome', document.getElementById('cliente').value.trim()],
+        ['Seu WhatsApp', document.getElementById('telefone').value.trim()],
+      ];
+
+      const obs = document.getElementById('obs').value.trim();
+      if (obs) rows.push(['Observações', obs]);
+
+      document.getElementById('resumo-box').innerHTML =
+        '<div class="resumo-title">📋 Resumo do pedido</div>' +
+        rows.map(([l, v]) => `
+          <div class="resumo-row">
+            <span class="resumo-label">${l}</span>
+            <span class="resumo-value">${v || '—'}</span>
+          </div>`).join('');
+    }
+
+    // ===== ENVIO WHATSAPP =====
+    function enviarWhatsApp() {
+      const nome        = document.getElementById('nome').value.trim();
+      const descricao   = document.getElementById('descricao').value.trim();
+      const posicao     = document.querySelector('input[name="posicao"]:checked')?.value;
+      const posOutra    = document.getElementById('posicao-outra').value.trim();
+      const estilo      = document.querySelector('input[name="estilo"]:checked')?.value;
+      const cliente     = document.getElementById('cliente').value.trim();
+      const telefone    = document.getElementById('telefone').value.trim();
+      const obs         = document.getElementById('obs').value.trim();
+      const posicaoFinal = posicao === 'Outra pose' && posOutra ? `Outra: ${posOutra}` : posicao;
+
+      const precos = { 'Funko Pop': 'A partir de R$ 35,00', 'Chibi': 'A partir de R$ 25,00', 'Outro': 'Valor a combinar' };
+
+      let msg = `🌵 *NOVO PEDIDO – TROKETS*\n\n`;
+      msg += `👤 *Personagem:* ${nome}\n`;
+      msg += `📝 *Descrição:* ${descricao}\n`;
+      msg += `🧍 *Posição:* ${posicaoFinal}\n`;
+      msg += `🎭 *Estilo:* ${estilo}\n`;
+      msg += `💰 *Preço estimado:* ${precos[estilo] || 'A combinar'}\n`;
+      msg += `\n📸 *Fotos de referência:* ${imagensAnexadas.length > 0 ? `${imagensAnexadas.length} foto(s) — envio em seguida` : 'Nenhuma'}\n`;
+      msg += `\n👤 *Nome do cliente:* ${cliente}\n`;
+      msg += `📱 *WhatsApp:* ${telefone}\n`;
+      if (obs) msg += `\n💬 *Observações:* ${obs}\n`;
+      msg += `\n⏱️ *Prazo:* 10 a 15 dias úteis\n`;
+      msg += `\n_Pedido enviado pelo site trokets.com.br_`;
+
+      const url = `https://wa.me/${WPP_NUMBER}?text=${encodeURIComponent(msg)}`;
+
+      const btn = document.getElementById('btn-enviar');
+      btn.disabled = true;
+      btn.innerHTML = '⏳ Abrindo WhatsApp...';
+
+      setTimeout(() => {
+        window.open(url, '_blank');
+        mostrarToast('✅ Pedido enviado! Finalize no WhatsApp.');
+        btn.disabled = false;
+        btn.innerHTML = `<svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.122 1.532 5.855L0 24l6.335-1.617A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.808 9.808 0 01-5.002-1.368l-.359-.213-3.722.95.988-3.61-.234-.371A9.818 9.818 0 012.182 12C2.182 6.58 6.58 2.182 12 2.182S21.818 6.58 21.818 12 17.42 21.818 12 21.818z"/></svg> Enviar pedido pelo WhatsApp`;
+      }, 600);
+    }
+
+    // ===== TOAST =====
+    function mostrarToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+  </script>
+
+</body>
+</html>

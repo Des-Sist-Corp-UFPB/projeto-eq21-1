@@ -8,18 +8,21 @@
 #
 # CONFIGURAÇÃO — arquivo .env na raiz do projeto no servidor:
 #
-#   APP_IMAGE=ghcr.io/usuario/mercado:latest   ← atualizado automaticamente pelo CI/CD
-#   DATABASE_URL=jdbc:postgresql://postgres:5432/mercado_prod
-#   DATABASE_USERNAME=mercado
-#   DATABASE_PASSWORD=<senha-forte-aqui>
+#   APP_IMAGE=ghcr.io/usuario/funko:latest   ← atualizado automaticamente pelo CI/CD
+#   DB_USERNAME=eq21
+#   DB_PASSWORD=<senha-forte-aqui>
+#   MINIO_ACCESS_KEY=eq21
+#   MINIO_SECRET=<chave-forte-aqui>
+#   JWT_SECRET=<chave-jwt-forte-aqui>
+#   JWT_EXPIRATION_MS=86400000
 #
-# PRIMEIRA EXECUÇÃO (banco de dados):
-#   docker compose -f docker/docker-compose.prod.yml up -d postgres
-#   # Aguardar o banco inicializar (~10s) e depois subir a aplicação:
-#   docker compose -f docker/docker-compose.prod.yml up -d app
+# PRIMEIRA EXECUÇÃO:
+#   1. docker compose -f docker/docker-compose.prod.yml up -d postgres minio
+#   2. Crie o bucket "eq21" no MinIO Console (http://localhost:9001)
+#   3. docker compose -f docker/docker-compose.prod.yml up -d app
 #
 # ATUALIZAÇÕES subsequentes (feitas automaticamente pelo GitHub Actions):
-#   APP_IMAGE=ghcr.io/usuario/mercado:latest \
+#   APP_IMAGE=ghcr.io/usuario/funko:latest \
 #   docker compose -f docker/docker-compose.prod.yml up -d --no-deps --force-recreate app
 #
 # =============================================================================
@@ -31,28 +34,63 @@ services:
   # ---------------------------------------------------------------------------
   postgres:
     image: postgres:16-alpine
-    container_name: mercado-postgres-prod
+    container_name: funko-postgres-prod
+    env_file:
+      - path: ../.env
+        required: true
     environment:
-      POSTGRES_DB: mercado_prod
-      POSTGRES_USER: ${DATABASE_USERNAME}
-      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: eq21
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       # Volume nomeado — persiste os dados mesmo se o container for recriado.
       # NUNCA use bind mount (./data:...) em produção — dificulta backups e permissões.
       - postgres-prod-data:/var/lib/postgresql/data
     # Em produção, NÃO exponha o banco diretamente para o host.
-    # O container da aplicação acessa via rede interna (mercado-net).
+    # O container da aplicação acessa via rede interna (funko-net).
     expose:
       - "5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USERNAME} -d mercado_prod"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d eq21"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 10s
     restart: unless-stopped
     networks:
-      - mercado-net
+      - funko-net
+
+  # ---------------------------------------------------------------------------
+  # MinIO: armazenamento de imagens S3-compatível
+  # Console: http://localhost:9001 (acesso local via SSH tunnel)
+  # API interna: http://minio:9000
+  # Na primeira execução, crie o bucket "eq21" pelo Console.
+  # ---------------------------------------------------------------------------
+  minio:
+    image: minio/minio:latest
+    container_name: funko-minio-prod
+    env_file:
+      - path: ../.env
+        required: true
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET}
+    volumes:
+      - minio-prod-data:/data
+    expose:
+      - "9000"
+    ports:
+      - "9001:9001"
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - funko-net
 
   # ---------------------------------------------------------------------------
   # Aplicação Spring Boot
@@ -61,37 +99,58 @@ services:
   # A variável APP_IMAGE é atualizada automaticamente no .env a cada deploy.
   # ---------------------------------------------------------------------------
   app:
-    # ${APP_IMAGE} é definida no .env e atualizada pelo script de deploy.
-    # Exemplo: ghcr.io/usuario/mercado:latest
-    # O CI/CD também usa tags com commit hash (ghcr.io/usuario/mercado:sha-a1b2c3d)
-    # para rastreabilidade — aqui usamos :latest que aponta para o build mais recente.
     image: ${APP_IMAGE}
-    container_name: mercado-app-prod
+    container_name: funko-app-prod
+    env_file:
+      - path: ../.env
+        required: true
     environment:
-      DATABASE_URL: ${DATABASE_URL:-jdbc:postgresql://postgres:5432/mercado_prod}
-      DATABASE_USERNAME: ${DATABASE_USERNAME}
-      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET: ${MINIO_SECRET}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS}
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      ADMIN_SENHA: ${ADMIN_SENHA}
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      OPENAI_MODEL: ${OPENAI_MODEL}
+      # ---------------------------------------------------------------------
+      # OpenTelemetry — telemetria (traces, métricas e logs) para o servidor
+      # central da disciplina. O agente já vem embutido na imagem e é
+      # anexado pelo ENTRYPOINT do docker/Dockerfile (-javaagent).
+      # ---------------------------------------------------------------------
+      OTEL_SERVICE_NAME: dsc-eq21
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT}
+      OTEL_EXPORTER_OTLP_PROTOCOL: ${OTEL_EXPORTER_OTLP_PROTOCOL}
+      OTEL_EXPORTER_OTLP_HEADERS: ${OTEL_EXPORTER_OTLP_HEADERS}
+      OTEL_TRACES_EXPORTER: otlp
+      OTEL_METRICS_EXPORTER: otlp
+      OTEL_LOGS_EXPORTER: otlp
     ports:
-      - "8080:8080"
+      - "127.0.0.1:8121:8121"
     depends_on:
       postgres:
+        condition: service_healthy
+      minio:
         condition: service_healthy
     # Healthcheck via Spring Actuator — o Docker considera o container saudável
     # somente quando a aplicação estiver pronta para receber requisições.
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health || exit 1"]
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8121/actuator/health || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 60s    # Spring Boot precisa de até 60s para inicializar
     restart: unless-stopped
     networks:
-      - mercado-net
+      - funko-net
 
 volumes:
-  # Volume nomeado — gerenciado pelo Docker, persistente entre deploys
   postgres-prod-data:
+  minio-prod-data:
 
 networks:
-  mercado-net:
+  funko-net:
     driver: bridge

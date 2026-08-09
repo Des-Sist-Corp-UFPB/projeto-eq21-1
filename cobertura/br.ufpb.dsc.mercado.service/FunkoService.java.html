@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FunkoService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">eq21</a> &gt; <a href="index.source.html" class="el_package">br.ufpb.dsc.mercado.service</a> &gt; <span class="el_source">FunkoService.java</span></div><h1>FunkoService.java</h1><pre class="source lang-java linenums">package br.ufpb.dsc.mercado.service;
+
+import br.ufpb.dsc.mercado.domain.Funko;
+import br.ufpb.dsc.mercado.dto.FunkoRequest;
+import br.ufpb.dsc.mercado.exception.FunkoNaoEncontradoException;
+import br.ufpb.dsc.mercado.repository.FunkoRepository;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+
+import java.io.IOException;
+import java.util.UUID;
+
+@Service
+public class FunkoService {
+
+    private final FunkoRepository repository;
+    private final S3Client s3Client;
+
+    @Value(&quot;${aws.s3.bucket}&quot;)
+    private String bucket;
+
+    @Value(&quot;${aws.s3.public-endpoint}&quot;)
+    private String publicEndpoint;
+
+<span class="fc" id="L33">    public FunkoService(FunkoRepository repository, S3Client s3Client) {</span>
+<span class="fc" id="L34">        this.repository = repository;</span>
+<span class="fc" id="L35">        this.s3Client = s3Client;</span>
+<span class="fc" id="L36">    }</span>
+
+    @Transactional(readOnly = true)
+    public Page&lt;Funko&gt; listar(Pageable pageable) {
+<span class="fc" id="L40">        return repository.findAll(pageable);</span>
+    }
+
+    @Transactional(readOnly = true)
+    public Page&lt;Funko&gt; buscar(String termo, Pageable pageable) {
+<span class="fc" id="L45">        return repository.findByNomeContainingIgnoreCaseOrFranquiaContainingIgnoreCase(</span>
+                termo, termo, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Funko buscarPorId(Long id) {
+<span class="fc" id="L51">        return repository.findById(id)</span>
+<span class="fc" id="L52">                .orElseThrow(() -&gt; new FunkoNaoEncontradoException(id));</span>
+    }
+
+    @Transactional
+    public Funko criar(FunkoRequest request, MultipartFile imagem) throws IOException {
+<span class="fc" id="L57">        Funko funko = new Funko(request.nome(), request.franquia(), request.preco());</span>
+<span class="pc bpc" id="L58" title="1 of 4 branches missed.">        if (imagem != null &amp;&amp; !imagem.isEmpty()) {</span>
+<span class="fc" id="L59">            funko.setImagemUrl(uploadImagem(imagem));</span>
+        }
+<span class="fc" id="L61">        return repository.save(funko);</span>
+    }
+
+    @Transactional
+    public Funko atualizar(Long id, FunkoRequest request, MultipartFile imagem) throws IOException {
+<span class="fc" id="L66">        Funko funko = buscarPorId(id);</span>
+<span class="fc" id="L67">        funko.setNome(request.nome());</span>
+<span class="fc" id="L68">        funko.setFranquia(request.franquia());</span>
+<span class="fc" id="L69">        funko.setPreco(request.preco());</span>
+<span class="pc bpc" id="L70" title="1 of 4 branches missed.">        if (imagem != null &amp;&amp; !imagem.isEmpty()) {</span>
+<span class="fc" id="L71">            funko.setImagemUrl(uploadImagem(imagem));</span>
+        }
+<span class="fc" id="L73">        return repository.save(funko);</span>
+    }
+
+    @Transactional
+    public void excluir(Long id) {
+<span class="fc" id="L78">        Funko funko = buscarPorId(id);</span>
+<span class="fc" id="L79">        repository.delete(funko);</span>
+<span class="fc" id="L80">    }</span>
+
+    private String uploadImagem(MultipartFile imagem) throws IOException {
+<span class="fc" id="L83">        String extensao = obterExtensao(imagem.getOriginalFilename());</span>
+<span class="fc" id="L84">        String chave = &quot;funkos/&quot; + UUID.randomUUID() + extensao;</span>
+
+<span class="fc" id="L86">        s3Client.putObject(</span>
+<span class="fc" id="L87">                PutObjectRequest.builder()</span>
+<span class="fc" id="L88">                        .bucket(bucket)</span>
+<span class="fc" id="L89">                        .key(chave)</span>
+<span class="fc" id="L90">                        .contentType(imagem.getContentType())</span>
+<span class="fc" id="L91">                        .contentLength(imagem.getSize())</span>
+<span class="fc" id="L92">                        .build(),</span>
+<span class="fc" id="L93">                RequestBody.fromBytes(imagem.getBytes())</span>
+        );
+
+<span class="fc" id="L96">        return publicEndpoint + &quot;/&quot; + bucket + &quot;/&quot; + chave;</span>
+    }
+
+    private String obterExtensao(String nomeArquivo) {
+<span class="pc bpc" id="L100" title="1 of 4 branches missed.">        if (nomeArquivo == null || !nomeArquivo.contains(&quot;.&quot;)) {</span>
+<span class="fc" id="L101">            return &quot;&quot;;</span>
+        }
+<span class="fc" id="L103">        return nomeArquivo.substring(nomeArquivo.lastIndexOf('.'));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

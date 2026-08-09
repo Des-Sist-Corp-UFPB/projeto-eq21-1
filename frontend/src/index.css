@@ -1,0 +1,146 @@
+/* ===== TOKENS DE COR ===== */
+:root {
+  --cream:       #DDC595;
+  --cream-light: #F0E0BB;
+  --cream-dark:  #C8AA75;
+  --green:       #4D6E26;
+  --green-dark:  #3A5219;
+  --green-light: #6A9435;
+  --offwhite:    #FAF5EC;
+  --dark:        #1C1C1C;
+  --gray:        #6B6B6B;
+  --gray-light:  #E8E3DA;
+  --danger:      #C0392B;
+  --danger-light:#fde8e8;
+  --radius:      18px;
+  --shadow:      0 4px 24px rgba(77,110,38,.13);
+}
+
+/* ===== RESET ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--offwhite);
+  color: var(--dark);
+  overflow-x: hidden;
+}
+
+/* ===== ANIMAÇÕES ===== */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-14px); }
+}
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ===== UTILITÁRIOS ===== */
+.section-label {
+  font-size: .78rem;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--green);
+  margin-bottom: 8px;
+}
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+  color: var(--green-dark);
+  margin-bottom: 14px;
+}
+.section-sub {
+  color: var(--gray);
+  font-size: 1rem;
+  max-width: 540px;
+  line-height: 1.7;
+}
+
+/* ===== BOTÕES ===== */
+.btn-primary {
+  background: var(--green);
+  color: #fff;
+  border: none;
+  padding: 14px 32px;
+  border-radius: 50px;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 1rem;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background .2s, transform .15s;
+  display: inline-block;
+}
+.btn-primary:hover { background: var(--green-dark); transform: translateY(-2px); }
+
+.btn-outline {
+  background: transparent;
+  color: var(--green);
+  border: 2px solid var(--green);
+  padding: 13px 30px;
+  border-radius: 50px;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 1rem;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all .2s;
+  display: inline-block;
+}
+.btn-outline:hover { background: var(--green); color: #fff; }
+
+/* ===== SKELETON ===== */
+.skeleton {
+  background: linear-gradient(90deg, #eee 25%, #f8f8f8 50%, #eee 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: 8px;
+}
+
+/* ===== RESPONSIVIDADE ===== */
+@media (max-width: 768px) {
+  .nav-links { display: none; }
+  .info-strip { flex-direction: column; }
+  .info-strip-item { border-right: none; border-bottom: 1px solid rgba(255,255,255,.2); }
+  .vitrine-grid, .precos-grid { grid-template-columns: 1fr !important; }
+  .hero { padding-top: 100px; flex-direction: column; text-align: center; }
+  .hero-btns { justify-content: center; }
+  .hero-visual { order: -1; margin-bottom: 20px; }
+  .footer-grid { grid-template-columns: 1fr !important; gap: 32px; }
+
+  /* Painel Admin: sidebar fixa vira topbar e o conteúdo ocupa a largura toda */
+  .admin-layout { flex-direction: column; }
+  .sidebar {
+    width: 100% !important;
+    position: relative !important;
+    height: auto !important;
+    flex-direction: row !important;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px !important;
+  }
+  .sidebar-logo { border-bottom: none !important; padding: 0 !important; }
+  .sidebar-logo img { height: 36px !important; }
+  .sidebar-menu { display: none; } /* menu completo escondido no mobile, igual ao nav-links da loja */
+  .sidebar-footer { border-top: none !important; padding: 0 !important; }
+  .main-content { margin-left: 0 !important; padding: 20px 4% !important; }
+  .header-panel { flex-direction: column; gap: 16px; align-items: flex-start; }
+  .table-container { overflow-x: auto; }
+  .table-container table { min-width: 600px; }
+
+  /* Formulário de Pedido: grids empilham e os cards reduzem o padding */
+  .field-row, .estilo-grid, .posicao-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px;
+  }
+  .form-card { padding: 20px !important; }
+}
+@media (max-width: 480px) {
+  .btn-primary, .btn-outline { width: 100%; text-align: center; }
+  .page-title { font-size: 1.8rem !important; }
+}

@@ -6,7 +6,7 @@
 V{número}__{descrição_com_underscores}.sql
 V1__criar_tabela_produto.sql
 V2__adicionar_indice_preco.sql
-V3__criar_tabela_categoria.sql
+V3__criar_tabela_usuario.sql
 ```
 
 - Nunca editar uma migration já commitada
@@ -20,7 +20,7 @@ feat: adicionar filtro por categoria de produto
 fix: corrigir cálculo de desconto no preço
 docs: atualizar README com instruções de deploy
 refactor: extrair validação de preço para método privado
-test: adicionar teste de integração para ProdutoService
+test: adicionar teste de integração para FunkoService
 chore: atualizar dependências do pom.xml
 ```
 
@@ -29,27 +29,29 @@ chore: atualizar dependências do pom.xml
 | Elemento | Convenção | Exemplo |
 |---|---|---|
 | Package | lowercase | `br.ufpb.dsc.mercado.service` |
-| Classe | PascalCase | `ProdutoService` |
+| Classe | PascalCase | `FunkoService` |
 | Método | camelCase | `buscarPorId()` |
 | Constante | UPPER_SNAKE | `MAX_NOME_LENGTH` |
-| Variável | camelCase | `produtoForm` |
+| Variável | camelCase | `funkoRequest` |
 
-## Padrão de Fragment HTMX
+## Nomenclatura React (Frontend)
 
-Templates em `templates/{entidade}/fragments/`:
-- `tabela.html` — fragment do `<tbody>` ou lista completa
-- `linha.html` — fragment de uma linha/item
-- `form.html` — fragment do formulário (modal)
+- Componentes: PascalCase (`ModalForm`, `BtnAcao`)
+- Funções e estados: camelCase (`carregar`, `setAnalisando`)
+- Arrow functions para callbacks e funções assíncronas internas
+- Props em camelCase: `onSalvar`, `onFechar`
 
-## Validação
+## Padrão REST (Controllers)
 
-- DTOs usam Bean Validation (`@NotBlank`, `@Size`, etc.)
-- Controller usa `@Valid` e `BindingResult`
-- Erros de validação retornam fragment com mensagens Bootstrap
+- Controllers anotados com `@RestController`
+- DTOs validados com `@Valid` e Bean Validation (`@NotBlank`, `@Size`, etc.)
+- Erros retornam JSON: `{ "erro": "mensagem" }` (via `GlobalExceptionHandler`)
+- Multipart para endpoints que recebem arquivos (`consumes = "multipart/form-data"`)
 
 ## Segurança — Boas Práticas
 
-- Usar `th:text` (escaping automático) ao invés de `th:utext`
-- Nunca concatenar strings em queries JPA (use parâmetros nomeados)
-- Variáveis sensíveis em `.env` (nunca hardcoded)
-- CSRF: habilitado por padrão, desabilitado apenas para endpoints HTMX específicos
+- Usar parâmetros nomeados em queries JPA (nunca concatenar strings)
+- Variáveis sensíveis em `.env` (nunca hardcoded no código)
+- CSRF desabilitado — autenticação JWT stateless (sem sessão no servidor)
+- Senhas armazenadas com BCrypt
+- JWT validado em cada requisição via `JwtAuthFilter`
